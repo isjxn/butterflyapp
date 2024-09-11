@@ -1,8 +1,14 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 /// Flutter code sample for [NavigationBar].
 
-void main() => runApp(const NavigationBarApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+ runApp(const NavigationBarApp());
+}
 
 class NavigationBarApp extends StatelessWidget {
   const NavigationBarApp({super.key});
@@ -36,7 +42,7 @@ class _NavigationExampleState extends State<NavigationExample> {
             currentPageIndex = index;
           });
         },
-        indicatorColor: Colors.amber,
+        indicatorColor: const Color.fromARGB(255, 73, 7, 255),
         selectedIndex: currentPageIndex,
         destinations: const <Widget>[
           NavigationDestination(
@@ -45,108 +51,117 @@ class _NavigationExampleState extends State<NavigationExample> {
             label: 'Übersicht',
           ),
           NavigationDestination(
-            icon: Badge(child: Icon(Icons.book)),
+            icon: Icon(Icons.book),
             label: 'Berichte',
           ),
           NavigationDestination(
-            icon: Badge(
-              child: Icon(Icons.hdr_plus),
-            ),
+            icon: Icon(Icons.hdr_plus),
             label: 'Add Button',
           ),
           NavigationDestination(
-            icon: Badge(
-              child: Icon(Icons.data_array),
-            ),
+            icon: Icon(Icons.data_array),
             label: 'Data',
           ),NavigationDestination(
-            icon: Badge(
-              child: Icon(Icons.menu),
-            ),
+            icon:  Icon(Icons.menu),
             label: 'Menu',
           ),
         ],
       ),
+      
       body: <Widget>[
-        /// Home page
+        /// Übersicht page
         Card(
           shadowColor: Colors.transparent,
           margin: const EdgeInsets.all(8.0),
           child: SizedBox.expand(
             child: Center(
               child: Text(
-                'Home page',
+                'Übersicht Seite',
                 style: theme.textTheme.titleLarge,
               ),
             ),
           ),
         ),
 
-        /// Notifications page
-        const Padding(
-          padding: EdgeInsets.all(8.0),
-          child: Column(
-            children: <Widget>[
-              Card(
-                child: ListTile(
-                  leading: Icon(Icons.notifications_sharp),
-                  title: Text('Notification 1'),
-                  subtitle: Text('This is a notification'),
-                ),
+        /// Bericht page
+        Card(
+          shadowColor: Colors.transparent,
+          margin: const EdgeInsets.all(8.0),
+          child: SizedBox.expand(
+            child: Center(
+              child: Text(
+                'Bericht Seite',
+                style: theme.textTheme.titleLarge,
               ),
-              Card(
-                child: ListTile(
-                  leading: Icon(Icons.notifications_sharp),
-                  title: Text('Notification 2'),
-                  subtitle: Text('This is a notification'),
-                ),
+            ),
+          ),
+        ),
+/// Add Picture page
+        Card(
+          shadowColor: Colors.transparent,
+          margin: const EdgeInsets.all(8.0),
+          child: SizedBox.expand(
+            child: Center(
+              child: Text(
+                'Take a picture',
+                style: theme.textTheme.titleLarge,
               ),
-            ],
+            ),
           ),
         ),
 
-        /// Messages page
-        ListView.builder(
-          reverse: true,
-          itemCount: 2,
-          itemBuilder: (BuildContext context, int index) {
-            if (index == 0) {
-              return Align(
-                alignment: Alignment.centerRight,
-                child: Container(
-                  margin: const EdgeInsets.all(8.0),
-                  padding: const EdgeInsets.all(8.0),
-                  decoration: BoxDecoration(
-                    color: theme.colorScheme.primary,
-                    borderRadius: BorderRadius.circular(8.0),
-                  ),
-                  child: Text(
-                    'Hello',
-                    style: theme.textTheme.bodyLarge!
-                        .copyWith(color: theme.colorScheme.onPrimary),
-                  ),
-                ),
-              );
-            }
-            return Align(
-              alignment: Alignment.centerLeft,
-              child: Container(
-                margin: const EdgeInsets.all(8.0),
-                padding: const EdgeInsets.all(8.0),
-                decoration: BoxDecoration(
-                  color: theme.colorScheme.primary,
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-                child: Text(
-                  'Hi!',
-                  style: theme.textTheme.bodyLarge!
-                      .copyWith(color: theme.colorScheme.onPrimary),
-                ),
+        /// Data page
+        const DataPage(), // Data page will fetch Firestore data
+
+        /// Menu page
+        Card(
+          shadowColor: Colors.transparent,
+          margin: const EdgeInsets.all(8.0),
+          child: SizedBox.expand(
+            child: Center(
+              child: Text(
+                'Menu Page',
+                style: theme.textTheme.titleLarge,
               ),
-            );
-          },
+            ),
+          ),
         ),
       ][currentPageIndex],
+    );
+  }
+}
+
+class DataPage extends StatelessWidget {
+  const DataPage({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance.collection('butterflies').snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (snapshot.hasError) {
+            return const Center(child: Text('Something went wrong'));
+          }
+
+          // If data is available
+          final data = snapshot.requireData;
+
+          return ListView.builder(
+            itemCount: data.size,
+            itemBuilder: (context, index) {
+              var doc = data.docs[index];
+              return ListTile(
+                title: Text(doc['species'] ?? 'Unknown Species'), // Display species name
+                subtitle: Text(doc['traits'] ?? 'No traits available'), // Display traits
+              );
+            },
+          );
+        },
+      ),
     );
   }
 }
