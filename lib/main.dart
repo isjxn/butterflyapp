@@ -2,8 +2,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-/// Flutter Beispiel für [NavigationBar].
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
@@ -16,14 +14,7 @@ class NavigationBarApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(
-        useMaterial3: true,
-        primaryColor: Colors.purple, // Color principal morado
-        appBarTheme: AppBarTheme(
-          backgroundColor: Colors.purple, // Color morado para el AppBar
-          foregroundColor: Colors.white, // Color del texto del AppBar
-        ),
-      ),
+      theme: ThemeData(useMaterial3: true),
       home: const NavigationExample(),
     );
   }
@@ -39,174 +30,142 @@ class NavigationExample extends StatefulWidget {
 class _NavigationExampleState extends State<NavigationExample> {
   int currentPageIndex = 0;
 
-  final Color _selectedColor = Colors.purple; // Morado para íconos seleccionados
-  final Color _unselectedColor = Colors.purple.withOpacity(0.6); // Morado transparente para íconos no seleccionados
-
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return Scaffold(
+      extendBody: true, // Ensures FAB extends over the bottom app bar
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // Add your functionality here
+        },
+        backgroundColor: const Color.fromARGB(255, 37, 150, 3), // Change button background color
+        foregroundColor: Colors.black, 
+        shape: const CircleBorder(),
+        child: const Icon(Icons.camera_alt),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      
+      // BottomAppBar with custom buttons
       bottomNavigationBar: BottomAppBar(
-        shape: const CircularNotchedRectangle(),
-        notchMargin: 6.0,
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        height: 60,
+        color: const Color.fromARGB(255, 119, 171, 105),
+        shape: const CircularNotchedRectangle(), // Allows FAB to notch into BottomAppBar
+        notchMargin: 5,
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
             IconButton(
-              icon: const Icon(Icons.home),
+              icon: const Icon(
+                Icons.home,
+                color: Colors.black,
+              ),
               onPressed: () {
                 setState(() {
-                  currentPageIndex = 0;
+                  currentPageIndex = 0; // Navigate to the "Übersichts" page
                 });
               },
-              color: currentPageIndex == 0
-                  ? _selectedColor
-                  : _unselectedColor,
-              tooltip: 'Übersicht',
             ),
             IconButton(
-              icon: const Icon(Icons.book),
+              icon: const Icon(
+                Icons.book,
+                color: Colors.black,
+              ),
               onPressed: () {
                 setState(() {
-                  currentPageIndex = 1;
+                  currentPageIndex = 1; // Navigate to the "Bericht" page
                 });
               },
-              color: currentPageIndex == 1
-                  ? _selectedColor
-                  : _unselectedColor,
-              tooltip: 'Berichte',
-            ),
-            const SizedBox(width: 48), // Platzhalter für die Kamera-Taste in der Mitte
-            IconButton(
-              icon: const Icon(Icons.history),
-              onPressed: () {
-                setState(() {
-                  currentPageIndex = 3;
-                });
-              },
-              color: currentPageIndex == 3
-                  ? _selectedColor
-                  : _unselectedColor,
-              tooltip: 'Historie',
             ),
             IconButton(
-              icon: const Icon(Icons.filter_alt), // Filter-Icon
+              icon: const Icon(
+                Icons.data_saver_off,
+                color: Colors.black,
+              ),
               onPressed: () {
                 setState(() {
-                  currentPageIndex = 4; // Wechsel zur Filter-Seite
+                  currentPageIndex = 3; // Navigate to the "Data" page
                 });
               },
-              color: currentPageIndex == 4
-                  ? _selectedColor
-                  : _unselectedColor,
-              tooltip: 'Filter',
+            ),
+            IconButton(
+              icon: const Icon(
+                Icons.menu,
+                color: Colors.black,
+              ),
+              onPressed: () {
+                // Add your print functionality here
+              },
             ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Kamera wird geöffnet...')),
-          );
-        },
-        child: const Icon(Icons.camera_alt),
-        tooltip: 'Foto machen',
-        backgroundColor: _selectedColor, // Hintergrundfarbe des Buttons
-        shape: const CircleBorder(), // Macht die Schaltfläche rund
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-
-      // Inhalt der Seiten
-      body: IndexedStack(
-        index: currentPageIndex,
-        children: <Widget>[
-          // Übersicht Seite
-          Scaffold(
-            appBar: AppBar(
-              title: const Text('Übersicht Seite'),
-            ),
-            body: Card(
-              shadowColor: Colors.transparent,
-              margin: const EdgeInsets.all(8.0),
-              child: SizedBox.expand(
-                child: Center(
-                  child: Text(
-                    'Übersicht Seite',
-                    style: theme.textTheme.titleLarge,
-                  ),
-                ),
+      
+      // Body content changes based on current page index
+      body: <Widget>[
+        // Übersicht page
+        Card(
+          shadowColor: Colors.transparent,
+          margin: const EdgeInsets.all(8.0),
+          child: SizedBox.expand(
+            child: Center(
+              child: Text(
+                'Übersicht Seite',
+                style: theme.textTheme.titleLarge,
               ),
             ),
           ),
-
-          // Berichte Seite
-          Scaffold(
-            appBar: AppBar(
-              title: const Text('Berichte Seite'),
-            ),
-            body: Card(
-              shadowColor: Colors.transparent,
-              margin: const EdgeInsets.all(8.0),
-              child: SizedBox.expand(
-                child: Center(
-                  child: Text(
-                    'Berichte Seite',
-                    style: theme.textTheme.titleLarge,
-                  ),
-                ),
+        ),
+        // Bericht page
+        Card(
+          shadowColor: Colors.transparent,
+          margin: const EdgeInsets.all(8.0),
+          child: SizedBox.expand(
+            child: Center(
+              child: Text(
+                'Bericht Seite',
+                style: theme.textTheme.titleLarge,
               ),
             ),
           ),
-
-          // Seite für Foto machen
-          Scaffold(
-            appBar: AppBar(
-              title: const Text('Foto machen'),
-            ),
-            body: Card(
-              shadowColor: Colors.transparent,
-              margin: const EdgeInsets.all(8.0),
-              child: SizedBox.expand(
-                child: Center(
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Kamera wird geöffnet...')),
-                      );
-                    },
-                    icon: const Icon(Icons.camera_alt),
-                    label: const Text('Foto machen'),
-                  ),
-                ),
+        ),
+        // Add Button page
+        Card(
+          shadowColor: Colors.transparent,
+          margin: const EdgeInsets.all(8.0),
+          child: SizedBox.expand(
+            child: Center(
+              child: Text(
+                'Add Button Page',
+                style: theme.textTheme.titleLarge,
               ),
             ),
           ),
-
-          // Historie Seite
-          Scaffold(
-            appBar: AppBar(
-              title: const Text('Historie'),
+        ),
+        // Data page
+        const DataPage(),  // Replaced the hardcoded DataPage with the real-time DataPage
+        // Menu page
+        Card(
+          shadowColor: Colors.transparent,
+          margin: const EdgeInsets.all(8.0),
+          child: SizedBox.expand(
+            child: Center(
+              child: Text(
+                'Menu Page',
+                style: theme.textTheme.titleLarge,
+              ),
             ),
-            body: const HistoriePage(),
           ),
-
-          // Filter Seite
-          Scaffold(
-            appBar: AppBar(
-              title: const Text('Filter und Suche'),
-            ),
-            body: FilterPage(),
-          ),
-        ],
-      ),
+        ),
+      ][currentPageIndex],
     );
   }
 }
 
-// Historie-Seite zeigt die Firestore-Daten an
-class HistoriePage extends StatelessWidget {
-  const HistoriePage({Key? key}) : super(key: key);
+class DataPage extends StatelessWidget {
+  const DataPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -218,88 +177,34 @@ class HistoriePage extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           }
           if (snapshot.hasError) {
-            return const Center(child: Text('Es ist ein Fehler aufgetreten'));
+            return const Center(child: Text('Something went wrong'));
           }
 
+          // If data is available
           final data = snapshot.requireData;
 
           return ListView.builder(
             itemCount: data.size,
             itemBuilder: (context, index) {
               var doc = data.docs[index];
-              return ListTile(
-                title: Text(doc['species'] ?? 'Unbekannte Art'),
-                subtitle: Text(doc['traits'] ?? 'Keine Merkmale verfügbar'),
-              );
+              return Card(
+                margin: const EdgeInsets.all(8.0),
+                child: ListTile(
+                  contentPadding: const EdgeInsets.all(8.0),
+                  leading: doc['image'] != null
+                      ? Image.network(
+                          doc['image'],
+                          width: 100,
+                          fit: BoxFit.cover,
+                        )
+                      : const Placeholder(),
+                  title: Text(doc['species'] ?? 'Unknown Species'), // Display species name
+                  subtitle: Text(doc['traits'] ?? 'No traits available'), // Display traits
+                ),);
             },
           );
         },
       ),
-    );
-  }
-}
-
-// Filter-Seite mit Suchfunktion
-class FilterPage extends StatefulWidget {
-  @override
-  _FilterPageState createState() => _FilterPageState();
-}
-
-class _FilterPageState extends State<FilterPage> {
-  String _searchQuery = ''; // Suchabfrage
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: <Widget>[
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: TextField(
-            onChanged: (value) {
-              setState(() {
-                _searchQuery = value; // Aktualisiert die Suchabfrage
-              });
-            },
-            decoration: InputDecoration(
-              labelText: 'Suche nach Namen oder Merkmalen',
-              prefixIcon: const Icon(Icons.search),
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(12.0),
-              ),
-            ),
-          ),
-        ),
-        Expanded(
-          child: StreamBuilder<QuerySnapshot>(
-            stream: FirebaseFirestore.instance
-                .collection('butterflies')
-                .where('species', isGreaterThanOrEqualTo: _searchQuery)
-                .where('species', isLessThanOrEqualTo: '$_searchQuery\uf8ff') // Fuzzy matching
-                .snapshots(),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              if (snapshot.hasError) {
-                return const Center(child: Text('Es ist ein Fehler aufgetreten'));
-              }
-
-              final data = snapshot.requireData;
-
-              return ListView.builder(
-                itemCount: data.size,
-                itemBuilder: (context, index) {
-                  var doc = data.docs[index];
-                  return ListTile(
-                    title: Text(doc['species'] ?? 'Unbekannte Art'),
-                    subtitle: Text(doc['traits'] ?? 'Keine Merkmale verfügbar'),
-                  );
-                },
-              );
-            },
-          ),
-        ),
-      ],
     );
   }
 }
