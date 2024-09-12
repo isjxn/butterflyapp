@@ -6,21 +6,6 @@ class MenuPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 25, 98, 2),
-        foregroundColor: Colors.black,
-        elevation: 0,
-        title: Row(
-          children: [
-            Image.asset(
-              'assets/images/logo.png', // Replace with your actual logo
-              height: 40.0,
-            ),
-            const SizedBox(width: 10),
-            const Text('Your App Title', style: TextStyle(color: Colors.white)),
-          ],
-        ),
-      ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [

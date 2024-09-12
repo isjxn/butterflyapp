@@ -1,7 +1,8 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+
 import 'menupage.dart';
+import 'datapage.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -108,6 +109,22 @@ class _NavigationExampleState extends State<NavigationExample> {
         ),
       ),
       
+      
+      appBar: AppBar(
+        backgroundColor: const Color.fromARGB(255, 25, 98, 2),
+        foregroundColor: Colors.black,
+        elevation: 0,
+        title: Row(
+          children: [
+            Image.asset(
+              'assets/images/schmetterling.png', // Replace with your actual logo
+              height: 40.0,
+            ),
+            const SizedBox(width: 10),
+            const Text('Tagfalter Monitoring', style: TextStyle(color: Colors.white)),
+          ],
+        ),
+      ),
       // Body content changes based on current page index
       body: <Widget>[
         // Home page
@@ -149,57 +166,12 @@ class _NavigationExampleState extends State<NavigationExample> {
             ),
           ),
         ),
-        // Data from Firebase
+        // DataPage (now coming from datapage.dart)
         const DataPage(),  
-        // Menu Page - Navigate to MenuPage
+        // MenuPage (from menupage.dart)
         const MenuPage(), // Load MenuPage
       ][currentPageIndex],
     );
   }
 }
 
-// todo: create seperate datapage.dart
-class DataPage extends StatelessWidget {
-  const DataPage({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance.collection('butterflies').snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return const Center(child: Text('Something went wrong'));
-          }
-
-          // If data is available
-          final data = snapshot.requireData;
-
-          return ListView.builder(
-            itemCount: data.size,
-            itemBuilder: (context, index) {
-              var doc = data.docs[index];
-              return Card(
-                margin: const EdgeInsets.all(8.0),
-                child: ListTile(
-                  contentPadding: const EdgeInsets.all(8.0),
-                  leading: doc['image'] != null
-                      ? Image.network(
-                          doc['image'],
-                          width: 100,
-                          fit: BoxFit.cover,
-                        )
-                      : const Placeholder(),
-                  title: Text(doc['species'] ?? 'Unknown Species'), // Display species name
-                  subtitle: Text(doc['traits'] ?? 'No traits available'), // Display traits
-                ),);
-            },
-          );
-        },
-      ),
-    );
-  }
-}
