@@ -2,12 +2,10 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
-/// Flutter code sample for [NavigationBar].
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
- runApp(const NavigationBarApp());
+  runApp(const NavigationBarApp());
 }
 
 class NavigationBarApp extends StatelessWidget {
@@ -36,40 +34,78 @@ class _NavigationExampleState extends State<NavigationExample> {
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     return Scaffold(
-      bottomNavigationBar: NavigationBar(
-        onDestinationSelected: (int index) {
-          setState(() {
-            currentPageIndex = index;
-          });
+      extendBody: true, // Ensures FAB extends over the bottom app bar
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // Add your functionality here
         },
-        indicatorColor: const Color.fromARGB(255, 73, 7, 255),
-        selectedIndex: currentPageIndex,
-        destinations: const <Widget>[
-          NavigationDestination(
-            selectedIcon: Icon(Icons.home),
-            icon: Icon(Icons.home_outlined),
-            label: 'Übersicht',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.book),
-            label: 'Berichte',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.hdr_plus),
-            label: 'Add Button',
-          ),
-          NavigationDestination(
-            icon: Icon(Icons.data_array),
-            label: 'Data',
-          ),NavigationDestination(
-            icon:  Icon(Icons.menu),
-            label: 'Menu',
-          ),
-        ],
+        backgroundColor: const Color.fromARGB(255, 37, 150, 3), // Change button background color
+        foregroundColor: Colors.black, 
+        shape: const CircleBorder(),
+        child: const Icon(Icons.camera_alt),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      
+      // BottomAppBar with custom buttons
+      bottomNavigationBar: BottomAppBar(
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        height: 60,
+        color: const Color.fromARGB(255, 119, 171, 105),
+        shape: const CircularNotchedRectangle(), // Allows FAB to notch into BottomAppBar
+        notchMargin: 5,
+        child: Row(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: <Widget>[
+            IconButton(
+              icon: const Icon(
+                Icons.home,
+                color: Colors.black,
+              ),
+              onPressed: () {
+                setState(() {
+                  currentPageIndex = 0; // Navigate to the "Übersichts" page
+                });
+              },
+            ),
+            IconButton(
+              icon: const Icon(
+                Icons.book,
+                color: Colors.black,
+              ),
+              onPressed: () {
+                setState(() {
+                  currentPageIndex = 1; // Navigate to the "Bericht" page
+                });
+              },
+            ),
+            IconButton(
+              icon: const Icon(
+                Icons.data_saver_off,
+                color: Colors.black,
+              ),
+              onPressed: () {
+                setState(() {
+                  currentPageIndex = 3; // Navigate to the "Data" page
+                });
+              },
+            ),
+            IconButton(
+              icon: const Icon(
+                Icons.menu,
+                color: Colors.black,
+              ),
+              onPressed: () {
+                // Add your print functionality here
+              },
+            ),
+          ],
+        ),
       ),
       
+      // Body content changes based on current page index
       body: <Widget>[
-        /// Übersicht page
+        // Übersicht page
         Card(
           shadowColor: Colors.transparent,
           margin: const EdgeInsets.all(8.0),
@@ -82,8 +118,7 @@ class _NavigationExampleState extends State<NavigationExample> {
             ),
           ),
         ),
-
-        /// Bericht page
+        // Bericht page
         Card(
           shadowColor: Colors.transparent,
           margin: const EdgeInsets.all(8.0),
@@ -96,24 +131,22 @@ class _NavigationExampleState extends State<NavigationExample> {
             ),
           ),
         ),
-/// Add Picture page
+        // Add Button page
         Card(
           shadowColor: Colors.transparent,
           margin: const EdgeInsets.all(8.0),
           child: SizedBox.expand(
             child: Center(
               child: Text(
-                'Take a picture',
+                'Add Button Page',
                 style: theme.textTheme.titleLarge,
               ),
             ),
           ),
         ),
-
-        /// Data page
-        const DataPage(), // Data page will fetch Firestore data
-
-        /// Menu page
+        // Data page
+        const DataPage(),  // Replaced the hardcoded DataPage with the real-time DataPage
+        // Menu page
         Card(
           shadowColor: Colors.transparent,
           margin: const EdgeInsets.all(8.0),
@@ -154,10 +187,20 @@ class DataPage extends StatelessWidget {
             itemCount: data.size,
             itemBuilder: (context, index) {
               var doc = data.docs[index];
-              return ListTile(
-                title: Text(doc['species'] ?? 'Unknown Species'), // Display species name
-                subtitle: Text(doc['traits'] ?? 'No traits available'), // Display traits
-              );
+              return Card(
+                margin: const EdgeInsets.all(8.0),
+                child: ListTile(
+                  contentPadding: const EdgeInsets.all(8.0),
+                  leading: doc['image'] != null
+                      ? Image.network(
+                          doc['image'],
+                          width: 100,
+                          fit: BoxFit.cover,
+                        )
+                      : const Placeholder(),
+                  title: Text(doc['species'] ?? 'Unknown Species'), // Display species name
+                  subtitle: Text(doc['traits'] ?? 'No traits available'), // Display traits
+                ),);
             },
           );
         },
