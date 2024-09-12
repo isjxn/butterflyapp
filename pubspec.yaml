@@ -39,7 +39,8 @@ dependencies:
   path_provider: ^2.1.4
   path: ^1.9.0
   firebase_core: ^3.4.1
-  cloud_firestore: ^5.4.1
+  cloud_firestore: ^5.4.1 # For Firestore
+  firebase_database: ^11.1.2  # For Realtime Database
 
 dev_dependencies:
   flutter_test:

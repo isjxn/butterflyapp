@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'detail_page.dart';
 
-// todo: create seperate datapage.dart
 class DataPage extends StatelessWidget {
   const DataPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Butterfly Species'),
+        backgroundColor: const Color.fromARGB(255, 119, 171, 105),
+      ),
       body: StreamBuilder<QuerySnapshot>(
         stream: FirebaseFirestore.instance.collection('butterflies').snapshots(),
         builder: (context, snapshot) {
@@ -18,27 +22,42 @@ class DataPage extends StatelessWidget {
             return const Center(child: Text('Something went wrong'));
           }
 
-          // If data is available
           final data = snapshot.requireData;
 
           return ListView.builder(
             itemCount: data.size,
             itemBuilder: (context, index) {
               var doc = data.docs[index];
+              var butterflyData = doc.data() as Map<String, dynamic>;
+
               return Card(
                 margin: const EdgeInsets.all(8.0),
                 child: ListTile(
                   contentPadding: const EdgeInsets.all(8.0),
-                  leading: doc['image'] != null
+                  leading: butterflyData['image'] != null
                       ? Image.network(
-                          doc['image'],
+                          butterflyData['image'],
                           width: 100,
+                          height: 100,
                           fit: BoxFit.cover,
                         )
-                      : const Placeholder(),
-                  title: Text(doc['species'] ?? 'Unknown Species'), // Display species name
-                  subtitle: Text(doc['traits'] ?? 'No traits available'), // Display traits
-                ),);
+                      : const Placeholder(
+                          fallbackHeight: 100,
+                          fallbackWidth: 100,
+                        ),
+                  title: Text(butterflyData['species'] ?? 'Unknown Species'),
+                  subtitle: Text(butterflyData['scientific_name'] ?? 'Unknown Scientific Name'),
+                  onTap: () {
+                    // Navigate to detail page on tap
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => DetailPage(butterflyData: butterflyData),
+                      ),
+                    );
+                  },
+                ),
+              );
             },
           );
         },
