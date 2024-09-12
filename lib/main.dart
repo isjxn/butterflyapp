@@ -111,7 +111,7 @@ class _NavigationExampleState extends State<NavigationExample> {
       
       
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 25, 98, 2),
+        backgroundColor: const Color.fromARGB(255, 119, 171, 105),
         foregroundColor: Colors.black,
         elevation: 0,
         title: Row(
@@ -121,7 +121,7 @@ class _NavigationExampleState extends State<NavigationExample> {
               height: 40.0,
             ),
             const SizedBox(width: 10),
-            const Text('Tagfalter Monitoring', style: TextStyle(color: Colors.white)),
+            const Text('Tagfalter Monitoring', style: TextStyle(color: Colors.black)),
           ],
         ),
       ),
