@@ -70,7 +70,7 @@ class _NavigationExampleState extends State<NavigationExample> {
             ),
             IconButton(
               icon: const Icon(
-                Icons.book,
+                Icons.search,
                 color: Colors.black,
               ),
               onPressed: () {
@@ -80,16 +80,17 @@ class _NavigationExampleState extends State<NavigationExample> {
               },
             ),
             IconButton(
-              icon: const Icon(
-                Icons.data_saver_off,
-                color: Colors.black,
+              icon: const ImageIcon(
+                AssetImage('assets/images/schmetterling.png'),  // Path to your custom icon
+                size: 24.0,  // Adjust the size as needed
+                // change color to black
               ),
-              onPressed: () {
-                setState(() {
-                  currentPageIndex = 3; // Navigate to the "Data" page
-                });
-              },
-            ),
+            onPressed: () {
+              setState(() {
+                currentPageIndex = 3; // Navigate to the "Data" page
+              });
+            },
+          ),
             IconButton(
               icon: const Icon(
                 Icons.menu,
@@ -105,47 +106,47 @@ class _NavigationExampleState extends State<NavigationExample> {
       
       // Body content changes based on current page index
       body: <Widget>[
-        // Übersicht page
+        // Home page
         Card(
           shadowColor: Colors.transparent,
           margin: const EdgeInsets.all(8.0),
           child: SizedBox.expand(
             child: Center(
               child: Text(
-                'Übersicht Seite',
+                'Home Page',
                 style: theme.textTheme.titleLarge,
               ),
             ),
           ),
         ),
-        // Bericht page
+        // Search page, search via traits -> boolean
         Card(
           shadowColor: Colors.transparent,
           margin: const EdgeInsets.all(8.0),
           child: SizedBox.expand(
             child: Center(
               child: Text(
-                'Bericht Seite',
+                'Search Page',
                 style: theme.textTheme.titleLarge,
               ),
             ),
           ),
         ),
-        // Add Button page
+        // todo: Camera integation here
         Card(
           shadowColor: Colors.transparent,
           margin: const EdgeInsets.all(8.0),
           child: SizedBox.expand(
             child: Center(
               child: Text(
-                'Add Button Page',
+                'Add Image Page',
                 style: theme.textTheme.titleLarge,
               ),
             ),
           ),
         ),
-        // Data page
-        const DataPage(),  // Replaced the hardcoded DataPage with the real-time DataPage
+        // Data from Firebase
+        const DataPage(),  
         // Menu page
         Card(
           shadowColor: Colors.transparent,
