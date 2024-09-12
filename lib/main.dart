@@ -1,6 +1,7 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'menupage.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,6 +15,7 @@ class NavigationBarApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      title: "Butterfly Demo",
       theme: ThemeData(useMaterial3: true),
       home: const NavigationExample(),
     );
@@ -39,7 +41,7 @@ class _NavigationExampleState extends State<NavigationExample> {
         onPressed: () {
           // Add your functionality here
         },
-        backgroundColor: const Color.fromARGB(255, 37, 150, 3), // Change button background color
+        backgroundColor: const Color.fromARGB(255, 25, 98, 2), // Change button background color
         foregroundColor: Colors.black, 
         shape: const CircleBorder(),
         child: const Icon(Icons.camera_alt),
@@ -83,7 +85,7 @@ class _NavigationExampleState extends State<NavigationExample> {
               icon: const ImageIcon(
                 AssetImage('assets/images/schmetterling.png'),  // Path to your custom icon
                 size: 24.0,  // Adjust the size as needed
-                // change color to black
+                color: Colors.black,
               ),
             onPressed: () {
               setState(() {
@@ -97,7 +99,9 @@ class _NavigationExampleState extends State<NavigationExample> {
                 color: Colors.black,
               ),
               onPressed: () {
-                // Add your print functionality here
+                setState(() {
+                currentPageIndex = 4; // Navigate to the "Menu" page
+              });
               },
             ),
           ],
@@ -147,24 +151,14 @@ class _NavigationExampleState extends State<NavigationExample> {
         ),
         // Data from Firebase
         const DataPage(),  
-        // Menu page
-        Card(
-          shadowColor: Colors.transparent,
-          margin: const EdgeInsets.all(8.0),
-          child: SizedBox.expand(
-            child: Center(
-              child: Text(
-                'Menu Page',
-                style: theme.textTheme.titleLarge,
-              ),
-            ),
-          ),
-        ),
+        // Menu Page - Navigate to MenuPage
+        const MenuPage(), // Load MenuPage
       ][currentPageIndex],
     );
   }
 }
 
+// todo: create seperate datapage.dart
 class DataPage extends StatelessWidget {
   const DataPage({Key? key}) : super(key: key);
 
