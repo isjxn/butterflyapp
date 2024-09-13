@@ -1,4 +1,4 @@
-name: butterflyapp
+name: tagfalter_monitoring
 description: "Butterfly App"
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
@@ -39,7 +39,8 @@ dependencies:
   path_provider: ^2.1.4
   path: ^1.9.0
   firebase_core: ^3.4.1
-  cloud_firestore: ^5.4.1
+  cloud_firestore: ^5.4.1 # For Firestore
+  firebase_database: ^11.1.2  # For Realtime Database
 
 dev_dependencies:
   flutter_test:
@@ -51,6 +52,15 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^4.0.0
+  flutter_launcher_icons: ^0.13.0
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/schmetterling.png"
+  android_display_name: "Tagfalter Monitoring"
+  ios_display_name: "Tagfalter Monitoring"
+
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
@@ -63,6 +73,8 @@ flutter:
   # the material Icons class.
   uses-material-design: true
 
+  assets:
+    - assets/images/
   # To add assets to your application, add an assets section, like this:
   # assets:
   #   - images/a_dot_burr.jpeg

@@ -1,6 +1,8 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+
+import 'menupage.dart';
+import 'datapage.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,6 +16,7 @@ class NavigationBarApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      title: "Butterfly Demo",
       theme: ThemeData(useMaterial3: true),
       home: const NavigationExample(),
     );
@@ -39,7 +42,7 @@ class _NavigationExampleState extends State<NavigationExample> {
         onPressed: () {
           // Add your functionality here
         },
-        backgroundColor: const Color.fromARGB(255, 37, 150, 3), // Change button background color
+        backgroundColor: const Color.fromARGB(255, 25, 98, 2), // Change button background color
         foregroundColor: Colors.black, 
         shape: const CircleBorder(),
         child: const Icon(Icons.camera_alt),
@@ -70,7 +73,7 @@ class _NavigationExampleState extends State<NavigationExample> {
             ),
             IconButton(
               icon: const Icon(
-                Icons.book,
+                Icons.search,
                 color: Colors.black,
               ),
               onPressed: () {
@@ -80,131 +83,95 @@ class _NavigationExampleState extends State<NavigationExample> {
               },
             ),
             IconButton(
-              icon: const Icon(
-                Icons.data_saver_off,
+              icon: const ImageIcon(
+                AssetImage('assets/images/schmetterling.png'),  // Path to your custom icon
+                size: 24.0,  // Adjust the size as needed
                 color: Colors.black,
               ),
-              onPressed: () {
-                setState(() {
-                  currentPageIndex = 3; // Navigate to the "Data" page
-                });
-              },
-            ),
+            onPressed: () {
+              setState(() {
+                currentPageIndex = 3; // Navigate to the "Data" page
+              });
+            },
+          ),
             IconButton(
               icon: const Icon(
                 Icons.menu,
                 color: Colors.black,
               ),
               onPressed: () {
-                // Add your print functionality here
+                setState(() {
+                currentPageIndex = 4; // Navigate to the "Menu" page
+              });
               },
             ),
           ],
         ),
       ),
       
+      
+      appBar: AppBar(
+        backgroundColor: const Color.fromARGB(255, 119, 171, 105),
+        foregroundColor: Colors.black,
+        elevation: 0,
+        title: Row(
+          children: [
+            Image.asset(
+              'assets/images/schmetterling.png', // Replace with your actual logo
+              height: 40.0,
+            ),
+            const SizedBox(width: 10),
+            const Text('Tagfalter Monitoring', style: TextStyle(color: Colors.black)),
+          ],
+        ),
+      ),
       // Body content changes based on current page index
       body: <Widget>[
-        // Übersicht page
+        // Home page
         Card(
           shadowColor: Colors.transparent,
           margin: const EdgeInsets.all(8.0),
           child: SizedBox.expand(
             child: Center(
               child: Text(
-                'Übersicht Seite',
+                'Home Page',
                 style: theme.textTheme.titleLarge,
               ),
             ),
           ),
         ),
-        // Bericht page
+        // Search page, search via traits -> boolean
         Card(
           shadowColor: Colors.transparent,
           margin: const EdgeInsets.all(8.0),
           child: SizedBox.expand(
             child: Center(
               child: Text(
-                'Bericht Seite',
+                'Search Page',
                 style: theme.textTheme.titleLarge,
               ),
             ),
           ),
         ),
-        // Add Button page
+        // todo: Camera integation here
         Card(
           shadowColor: Colors.transparent,
           margin: const EdgeInsets.all(8.0),
           child: SizedBox.expand(
             child: Center(
               child: Text(
-                'Add Button Page',
+                'Add Image Page',
                 style: theme.textTheme.titleLarge,
               ),
             ),
           ),
         ),
-        // Data page
-        const DataPage(),  // Replaced the hardcoded DataPage with the real-time DataPage
-        // Menu page
-        Card(
-          shadowColor: Colors.transparent,
-          margin: const EdgeInsets.all(8.0),
-          child: SizedBox.expand(
-            child: Center(
-              child: Text(
-                'Menu Page',
-                style: theme.textTheme.titleLarge,
-              ),
-            ),
-          ),
-        ),
+        // DataPage (now coming from datapage.dart)
+        const DataPage(),  
+        // MenuPage (from menupage.dart)
+        const MenuPage(), // Load MenuPage
       ][currentPageIndex],
     );
   }
 }
 
-class DataPage extends StatelessWidget {
-  const DataPage({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: StreamBuilder<QuerySnapshot>(
-        stream: FirebaseFirestore.instance.collection('butterflies').snapshots(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          if (snapshot.hasError) {
-            return const Center(child: Text('Something went wrong'));
-          }
-
-          // If data is available
-          final data = snapshot.requireData;
-
-          return ListView.builder(
-            itemCount: data.size,
-            itemBuilder: (context, index) {
-              var doc = data.docs[index];
-              return Card(
-                margin: const EdgeInsets.all(8.0),
-                child: ListTile(
-                  contentPadding: const EdgeInsets.all(8.0),
-                  leading: doc['image'] != null
-                      ? Image.network(
-                          doc['image'],
-                          width: 100,
-                          fit: BoxFit.cover,
-                        )
-                      : const Placeholder(),
-                  title: Text(doc['species'] ?? 'Unknown Species'), // Display species name
-                  subtitle: Text(doc['traits'] ?? 'No traits available'), // Display traits
-                ),);
-            },
-          );
-        },
-      ),
-    );
-  }
-}
