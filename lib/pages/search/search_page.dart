@@ -1,10 +1,57 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-class SearchPage extends StatelessWidget {
-  final TextEditingController searchController;
-  final List<String> filteredButterflyList;
+class SearchPage extends StatefulWidget {
+  const SearchPage({super.key});
 
-  const SearchPage({super.key, required this.searchController, required this.filteredButterflyList});
+  @override
+  SearchPageState createState() => SearchPageState();
+}
+
+class SearchPageState extends State<SearchPage> {
+  final TextEditingController _searchController = TextEditingController();
+  String _searchText = "";
+  List<String> _filteredButterflyList = [];
+
+  final CollectionReference _butterfliesRef =
+  FirebaseFirestore.instance.collection('butterflies');
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController.addListener(_onSearchChanged);
+  }
+
+  // Function to handle search logic
+  void _onSearchChanged() async {
+    setState(() {
+      _searchText = _searchController.text.toLowerCase();
+    });
+
+    if (_searchText.isNotEmpty) {
+      QuerySnapshot querySnapshot = await _butterfliesRef
+          .where('name', isGreaterThanOrEqualTo: _searchText)
+          .where('name', isLessThanOrEqualTo: '$_searchText\uf8ff')
+          .get();
+
+      setState(() {
+        _filteredButterflyList = querySnapshot.docs
+            .map((doc) => doc['name'] as String)
+            .toList();
+      });
+    } else {
+      setState(() {
+        _filteredButterflyList = [];
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _searchController.removeListener(_onSearchChanged);
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -16,7 +63,7 @@ class SearchPage extends StatelessWidget {
         children: [
           // Search bar
           TextField(
-            controller: searchController,
+            controller: _searchController,
             decoration: InputDecoration(
               labelText: 'Suchen schmetterling...',
               prefixIcon: const Icon(Icons.search),
@@ -34,7 +81,7 @@ class SearchPage extends StatelessWidget {
           const SizedBox(height: 20),
           // Display filtered list of butterflies from Firebase
           Expanded(
-            child: filteredButterflyList.isEmpty
+            child: _filteredButterflyList.isEmpty
                 ? Center(
               child: Text(
                 'Schmetterling nicht gefunden',
@@ -42,10 +89,10 @@ class SearchPage extends StatelessWidget {
               ),
             )
                 : ListView.builder(
-              itemCount: filteredButterflyList.length,
+              itemCount: _filteredButterflyList.length,
               itemBuilder: (context, index) {
                 return ListTile(
-                  title: Text(filteredButterflyList[index]),
+                  title: Text(_filteredButterflyList[index]),
                   onTap: () {
                     // Add functionality to navigate to a detailed page or action if needed
                   },

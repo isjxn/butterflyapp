@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:tagfalter_monitoring/firebase_options.dart';
@@ -26,44 +25,6 @@ class ButterflyApp extends StatefulWidget {
 
 class ButterflyAppState extends State<ButterflyApp> {
   int currentPageIndex = 0;
-  final TextEditingController _searchController = TextEditingController();
-  String _searchText = "";
-
-  // Firestore reference to the butterflies collection
-  final CollectionReference _butterfliesRef =
-  FirebaseFirestore.instance.collection('butterflies');
-
-  List<String> _filteredButterflyList = [];
-
-  @override
-  void initState() {
-    super.initState();
-    _searchController.addListener(_onSearchChanged);
-  }
-
-  // Function to handle search logic
-  void _onSearchChanged() async {
-    setState(() {
-      _searchText = _searchController.text.toLowerCase();
-    });
-
-    if (_searchText.isNotEmpty) {
-      QuerySnapshot querySnapshot = await _butterfliesRef
-          .where('name', isGreaterThanOrEqualTo: _searchText)
-          .where('name', isLessThanOrEqualTo: '$_searchText\uf8ff')
-          .get();
-
-      setState(() {
-        _filteredButterflyList = querySnapshot.docs
-            .map((doc) => doc['name'] as String)
-            .toList();
-      });
-    } else {
-      setState(() {
-        _filteredButterflyList = [];
-      });
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +33,6 @@ class ButterflyAppState extends State<ButterflyApp> {
       theme: ThemeData(useMaterial3: true),
       home: Scaffold(
         extendBody: true,
-
         floatingActionButton: FloatingActionButton(
           onPressed: () {},
           backgroundColor: const Color.fromARGB(255, 25, 98, 2),
@@ -95,10 +55,7 @@ class ButterflyAppState extends State<ButterflyApp> {
 
         body: <Widget>[
           const HomePage(),
-          SearchPage(
-            searchController: _searchController,
-            filteredButterflyList: _filteredButterflyList,
-          ),
+          const SearchPage(), // Updated to remove dependencies
           const ImagePage(),
           const DataPage(),
           const MenuPage(),
