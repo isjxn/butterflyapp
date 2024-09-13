@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "641405620761",
+    "project_id": "tagfalter-monitoring-bb766",
+    "storage_bucket": "tagfalter-monitoring-bb766.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:641405620761:android:e39a93cf076f94f74a9088",
+        "android_client_info": {
+          "package_name": "com.example.butterflyapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB0P1uxxZM3sbi1_rXLitN2sQuv4Tr-pOI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
