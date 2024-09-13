@@ -1,6 +1,8 @@
+import 'package:camera/camera.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:tagfalter_monitoring/firebase_options.dart';
+import 'package:tagfalter_monitoring/pages/camera/camera_page.dart';
 import 'package:tagfalter_monitoring/pages/home/home_page.dart';
 import 'package:tagfalter_monitoring/pages/image/image_page.dart';
 import 'package:tagfalter_monitoring/pages/search/search_page.dart';
@@ -10,14 +12,19 @@ import 'package:tagfalter_monitoring/widgets/app_bar_widget.dart'; // Import the
 import 'pages/menu/menu_page.dart';
 import 'pages/data/data_page.dart';
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  runApp(const ButterflyApp());
+
+  final cameras = await availableCameras();
+  final firstCamera = cameras.first;
+  runApp(ButterflyApp(camera: firstCamera));
 }
 
 class ButterflyApp extends StatefulWidget {
-  const ButterflyApp({super.key});
+  const ButterflyApp({super.key, required this.camera});
+
+  final CameraDescription camera;
 
   @override
   State<ButterflyApp> createState() => ButterflyAppState();
@@ -34,7 +41,17 @@ class ButterflyAppState extends State<ButterflyApp> {
       home: Scaffold(
         extendBody: true,
         floatingActionButton: FloatingActionButton(
-          onPressed: () {},
+          onPressed: () {
+            if (currentPageIndex == 5) {
+              setState(() {
+                currentPageIndex = 2;
+              });
+            } else {
+              setState(() {
+                currentPageIndex = 5;
+              });
+            }
+          },
           backgroundColor: const Color.fromARGB(255, 25, 98, 2),
           foregroundColor: Colors.black,
           shape: const CircleBorder(),
@@ -59,6 +76,7 @@ class ButterflyAppState extends State<ButterflyApp> {
           const ImagePage(),
           const DataPage(),
           const MenuPage(),
+          CameraPage(camera: widget.camera)
         ][currentPageIndex],
       ),
     );
