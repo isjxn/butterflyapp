@@ -15,27 +15,14 @@ void main() async {
   runApp(const ButterflyApp());
 }
 
-class ButterflyApp extends StatelessWidget {
+class ButterflyApp extends StatefulWidget {
   const ButterflyApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: "Butterfly Demo",
-      theme: ThemeData(useMaterial3: true),
-      home: const MainWidget(),
-    );
-  }
+  State<ButterflyApp> createState() => ButterflyAppState();
 }
 
-class MainWidget extends StatefulWidget {
-  const MainWidget({super.key});
-
-  @override
-  State<MainWidget> createState() => MainWidgetState();
-}
-
-class MainWidgetState extends State<MainWidget> {
+class ButterflyAppState extends State<ButterflyApp> {
   int currentPageIndex = 0;
   final TextEditingController _searchController = TextEditingController();
   String _searchText = "";
@@ -78,101 +65,104 @@ class MainWidgetState extends State<MainWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    return Scaffold(
-      extendBody: true,
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        backgroundColor: const Color.fromARGB(255, 25, 98, 2),
-        foregroundColor: Colors.black,
-        shape: const CircleBorder(),
-        child: const Icon(Icons.camera_alt),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-
-      bottomNavigationBar: BottomAppBar(
-        padding: const EdgeInsets.symmetric(horizontal: 10),
-        height: 60,
-        color: const Color.fromARGB(255, 119, 171, 105),
-        shape: const CircularNotchedRectangle(),
-        notchMargin: 5,
-        child: Row(
-          mainAxisSize: MainAxisSize.max,
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: <Widget>[
-            IconButton(
-              icon: Icon(
-                Icons.home,
-                color: currentPageIndex == 0 ? Colors.white : Colors.black,
-              ),
-              onPressed: () {
-                setState(() {
-                  currentPageIndex = 0;
-                });
-              },
-            ),
-            IconButton(
-              icon: Icon(
-                Icons.search,
-                color: currentPageIndex == 1 ? Colors.white : Colors.black,
-              ),
-              onPressed: () {
-                setState(() {
-                  currentPageIndex = 1;
-                });
-              },
-            ),
-            IconButton(
-              icon: ImageIcon(
-                const AssetImage('assets/images/schmetterling.png'),
-                size: 24.0,
-                color: currentPageIndex == 2 ? Colors.white : Colors.black,
-              ),
-              onPressed: () {
-                setState(() {
-                  currentPageIndex = 2;
-                });
-              },
-            ),
-            IconButton(
-              icon: Icon(
-                Icons.menu,
-                color: currentPageIndex == 3 ? Colors.white : Colors.black,
-              ),
-              onPressed: () {
-                setState(() {
-                  currentPageIndex = 3;
-                });
-              },
-            ),
-          ],
+    return MaterialApp(
+      title: "Butterfly Demo",
+      theme: ThemeData(useMaterial3: true),
+      home: Scaffold(
+        extendBody: true,
+        floatingActionButton: FloatingActionButton(
+          onPressed: () {},
+          backgroundColor: const Color.fromARGB(255, 25, 98, 2),
+          foregroundColor: Colors.black,
+          shape: const CircleBorder(),
+          child: const Icon(Icons.camera_alt),
         ),
-      ),
-
-      appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 119, 171, 105),
-        foregroundColor: Colors.black,
-        elevation: 0,
-        title: Row(
-          children: [
-            Image.asset(
-              'assets/images/schmetterling.png',
-              height: 40.0,
-            ),
-            const SizedBox(width: 10),
-            const Text('Tagfalter Monitoring',
-                style: TextStyle(color: Colors.black)),
-          ],
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+        bottomNavigationBar: BottomAppBar(
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          height: 60,
+          color: const Color.fromARGB(255, 119, 171, 105),
+          shape: const CircularNotchedRectangle(),
+          notchMargin: 5,
+          child: Row(
+            mainAxisSize: MainAxisSize.max,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              IconButton(
+                icon: Icon(
+                  Icons.home,
+                  color: currentPageIndex == 0 ? Colors.white : Colors.black,
+                ),
+                onPressed: () {
+                  setState(() {
+                    currentPageIndex = 0;
+                  });
+                },
+              ),
+              IconButton(
+                icon: Icon(
+                  Icons.search,
+                  color: currentPageIndex == 1 ? Colors.white : Colors.black,
+                ),
+                onPressed: () {
+                  setState(() {
+                    currentPageIndex = 1;
+                  });
+                },
+              ),
+              IconButton(
+                icon: ImageIcon(
+                  const AssetImage('assets/images/schmetterling.png'),
+                  size: 24.0,
+                  color: currentPageIndex == 2 ? Colors.white : Colors.black,
+                ),
+                onPressed: () {
+                  setState(() {
+                    currentPageIndex = 2;
+                  });
+                },
+              ),
+              IconButton(
+                icon: Icon(
+                  Icons.menu,
+                  color: currentPageIndex == 3 ? Colors.white : Colors.black,
+                ),
+                onPressed: () {
+                  setState(() {
+                    currentPageIndex = 3;
+                  });
+                },
+              ),
+            ],
+          ),
         ),
+        appBar: AppBar(
+          backgroundColor: const Color.fromARGB(255, 119, 171, 105),
+          foregroundColor: Colors.black,
+          elevation: 0,
+          title: Row(
+            children: [
+              Image.asset(
+                'assets/images/schmetterling.png',
+                height: 40.0,
+              ),
+              const SizedBox(width: 10),
+              const Text('Tagfalter Monitoring',
+                  style: TextStyle(color: Colors.black)),
+            ],
+          ),
+        ),
+        // Body content changes based on current page index
+        body: <Widget>[
+          const HomePage(),
+          SearchPage(
+              searchController: _searchController,
+              filteredButterflyList: _filteredButterflyList),
+          const ImagePage(),
+          const DataPage(),
+          const MenuPage(),
+        ][currentPageIndex],
       ),
-      // Body content changes based on current page index
-      body: <Widget>[
-        const HomePage(),
-        SearchPage(searchController:  _searchController, filteredButterflyList: _filteredButterflyList),
-        const ImagePage(),
-        const DataPage(),
-        const MenuPage(),
-      ][currentPageIndex],
     );
   }
 }
