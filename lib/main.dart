@@ -1,125 +1,279 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(const MyApp());
+import 'menupage.dart';
+import 'datapage.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  runApp(const NavigationBarApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class NavigationBarApp extends StatelessWidget {
+  const NavigationBarApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+      title: "Butterfly Demo",
+      theme: ThemeData(useMaterial3: true),
+      home: const NavigationExample(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
+class NavigationExample extends StatefulWidget {
+  const NavigationExample({super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<NavigationExample> createState() => _NavigationExampleState();
 }
 
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+class _NavigationExampleState extends State<NavigationExample> {
+  int currentPageIndex = 0;
+  final TextEditingController _searchController = TextEditingController();
+  String _searchText = "";
 
-  void _incrementCounter() {
+  // Firestore reference to the butterflies collection
+  final CollectionReference _butterfliesRef =
+  FirebaseFirestore.instance.collection('butterflies');
+
+  List<String> _filteredButterflyList = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController.addListener(_onSearchChanged);
+  }
+
+  // Function to handle search logic
+  void _onSearchChanged() async {
     setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
+      _searchText = _searchController.text.toLowerCase();
     });
+
+    if (_searchText.isNotEmpty) {
+      QuerySnapshot querySnapshot = await _butterfliesRef
+          .where('name', isGreaterThanOrEqualTo: _searchText)
+          .where('name', isLessThanOrEqualTo: '$_searchText\uf8ff')
+          .get();
+
+      setState(() {
+        _filteredButterflyList = querySnapshot.docs
+            .map((doc) => doc['name'] as String)
+            .toList();
+      });
+    } else {
+      setState(() {
+        _filteredButterflyList = [];
+      });
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
+    final ThemeData theme = Theme.of(context);
     return Scaffold(
-      appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+      extendBody: true,
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {},
+        backgroundColor: const Color.fromARGB(255, 25, 98, 2),
+        foregroundColor: Colors.black,
+        shape: const CircleBorder(),
+        child: const Icon(Icons.camera_alt),
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+
+      bottomNavigationBar: BottomAppBar(
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        height: 60,
+        color: const Color.fromARGB(255, 119, 171, 105),
+        shape: const CircularNotchedRectangle(),
+        notchMargin: 5,
+        child: Row(
+          mainAxisSize: MainAxisSize.max,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+            IconButton(
+              icon: Icon(
+                Icons.home,
+                color: currentPageIndex == 0 ? Colors.white : Colors.black,
+              ),
+              onPressed: () {
+                setState(() {
+                  currentPageIndex = 0;
+                });
+              },
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+            IconButton(
+              icon: Icon(
+                Icons.search,
+                color: currentPageIndex == 1 ? Colors.white : Colors.black,
+              ),
+              onPressed: () {
+                setState(() {
+                  currentPageIndex = 1;
+                });
+              },
+            ),
+            IconButton(
+              icon: ImageIcon(
+                const AssetImage('assets/images/schmetterling.png'),
+                size: 24.0,
+                color: currentPageIndex == 2 ? Colors.white : Colors.black,
+              ),
+              onPressed: () {
+                setState(() {
+                  currentPageIndex = 2;
+                });
+              },
+            ),
+            IconButton(
+              icon: Icon(
+                Icons.menu,
+                color: currentPageIndex == 3 ? Colors.white : Colors.black,
+              ),
+              onPressed: () {
+                setState(() {
+                  currentPageIndex = 3;
+                });
+              },
             ),
           ],
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+
+      appBar: AppBar(
+        backgroundColor: const Color.fromARGB(255, 119, 171, 105),
+        foregroundColor: Colors.black,
+        elevation: 0,
+        title: Row(
+          children: [
+            Image.asset(
+              'assets/images/schmetterling.png',
+              height: 40.0,
+            ),
+            const SizedBox(width: 10),
+            const Text('Tagfalter Monitoring',
+                style: TextStyle(color: Colors.black)),
+          ],
+        ),
+      ),
+      // Body content changes based on current page index
+      body: <Widget>[
+        // Home page
+        Scrollbar(
+          thumbVisibility: true,
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Willkommen zum Tagfalter Monitoring',
+                    style: theme.textTheme.headlineSmall
+                        ?.copyWith(fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    'TMD zur neuen ONLINE-DATENEINGABE (ab 2024)',
+                    style: theme.textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    'Im Frühjahr 2005 startete das Tagfalter-Monitoring in Deutschland. '
+                        'Jahr für Jahr erfassen Freiwillige bei wöchentlichen Begehungen entlang '
+                        'festgelegter Strecken alle tagaktiven Schmetterlinge. Die gesammelten Daten '
+                        'dokumentieren die Entwicklung der Schmetterlingsbestände auf lokaler, '
+                        'regionaler und nationaler Ebene und können mit denen anderer europäischer Länder '
+                        'verglichen werden, in denen diese Beobachtungen schon seit Jahrzehnten durchgeführt werden.',
+                    style: theme.textTheme.bodyLarge,
+                    textAlign: TextAlign.justify,
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    'Das Projekt wird von zahlreichen Organisationen unterstützt, darunter NABU, BUND, '
+                        'das Bundesamt für Naturschutz (BfN), entomologische Verbände, die Gesellschaft für '
+                        'Schmetterlingsschutz sowie die europäische Stiftung Butterfly Conservation Europe.',
+                    style: theme.textTheme.bodyLarge,
+                    textAlign: TextAlign.justify,
+                  ),
+                  const SizedBox(height: 8), // Reduced space between text and image
+                  Center(
+                    child: Image.asset(
+                      'assets/images/UFZ_Logo.png',
+                      height: 150,
+                    ),
+                  ),
+                  const SizedBox(height: 30), // Added space after the logo
+                ],
+              ),
+            ),
+          ),
+        ),
+        // Search page with search bar and list of butterflies
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              // Search bar
+              TextField(
+                controller: _searchController,
+                decoration: InputDecoration(
+                  labelText: 'Suchen schmetterling...',
+                  prefixIcon: const Icon(Icons.search),
+                  filled: true,
+                  fillColor: Colors.white,
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8.0),
+                    borderSide: BorderSide(
+                      color: const Color.fromARGB(255, 119, 171, 105),
+                      width: 2.0,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
+              // Display filtered list of butterflies from Firebase
+              Expanded(
+                child: _filteredButterflyList.isEmpty
+                    ? Center(
+                  child: Text(
+                    'Schmetterling nicht gefunden',
+                    style: theme.textTheme.bodyLarge,
+                  ),
+                )
+                    : ListView.builder(
+                  itemCount: _filteredButterflyList.length,
+                  itemBuilder: (context, index) {
+                    return ListTile(
+                      title: Text(_filteredButterflyList[index]),
+                      onTap: () {
+                        // Add functionality to navigate to a detailed page or action if needed
+                      },
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+        // Add Image page
+        Center(
+          child: Text(
+            'Bild hinzufügen',
+            style: theme.textTheme.titleLarge,
+          ),
+        ),
+        // Data page
+        const DataPage(),
+        // Menu page
+        const MenuPage(),
+      ][currentPageIndex],
     );
   }
 }
