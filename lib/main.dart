@@ -5,6 +5,8 @@ import 'package:tagfalter_monitoring/firebase_options.dart';
 import 'package:tagfalter_monitoring/pages/home/home_page.dart';
 import 'package:tagfalter_monitoring/pages/image/image_page.dart';
 import 'package:tagfalter_monitoring/pages/search/search_page.dart';
+import 'package:tagfalter_monitoring/widgets/bottom_navigation_bar_widget.dart';
+import 'package:tagfalter_monitoring/widgets/app_bar_widget.dart'; // Import the new AppBar widget
 
 import 'pages/menu/menu_page.dart';
 import 'pages/data/data_page.dart';
@@ -70,6 +72,7 @@ class ButterflyAppState extends State<ButterflyApp> {
       theme: ThemeData(useMaterial3: true),
       home: Scaffold(
         extendBody: true,
+
         floatingActionButton: FloatingActionButton(
           onPressed: () {},
           backgroundColor: const Color.fromARGB(255, 25, 98, 2),
@@ -78,86 +81,24 @@ class ButterflyAppState extends State<ButterflyApp> {
           child: const Icon(Icons.camera_alt),
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        bottomNavigationBar: BottomAppBar(
-          padding: const EdgeInsets.symmetric(horizontal: 10),
-          height: 60,
-          color: const Color.fromARGB(255, 119, 171, 105),
-          shape: const CircularNotchedRectangle(),
-          notchMargin: 5,
-          child: Row(
-            mainAxisSize: MainAxisSize.max,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: <Widget>[
-              IconButton(
-                icon: Icon(
-                  Icons.home,
-                  color: currentPageIndex == 0 ? Colors.white : Colors.black,
-                ),
-                onPressed: () {
-                  setState(() {
-                    currentPageIndex = 0;
-                  });
-                },
-              ),
-              IconButton(
-                icon: Icon(
-                  Icons.search,
-                  color: currentPageIndex == 1 ? Colors.white : Colors.black,
-                ),
-                onPressed: () {
-                  setState(() {
-                    currentPageIndex = 1;
-                  });
-                },
-              ),
-              IconButton(
-                icon: ImageIcon(
-                  const AssetImage('assets/images/schmetterling.png'),
-                  size: 24.0,
-                  color: currentPageIndex == 2 ? Colors.white : Colors.black,
-                ),
-                onPressed: () {
-                  setState(() {
-                    currentPageIndex = 2;
-                  });
-                },
-              ),
-              IconButton(
-                icon: Icon(
-                  Icons.menu,
-                  color: currentPageIndex == 3 ? Colors.white : Colors.black,
-                ),
-                onPressed: () {
-                  setState(() {
-                    currentPageIndex = 3;
-                  });
-                },
-              ),
-            ],
-          ),
+
+        bottomNavigationBar: BottomNavigationBarWidget(
+          currentPageIndex: currentPageIndex,
+          onPageSelected: (int index) {
+            setState(() {
+              currentPageIndex = index;
+            });
+          },
         ),
-        appBar: AppBar(
-          backgroundColor: const Color.fromARGB(255, 119, 171, 105),
-          foregroundColor: Colors.black,
-          elevation: 0,
-          title: Row(
-            children: [
-              Image.asset(
-                'assets/images/schmetterling.png',
-                height: 40.0,
-              ),
-              const SizedBox(width: 10),
-              const Text('Tagfalter Monitoring',
-                  style: TextStyle(color: Colors.black)),
-            ],
-          ),
-        ),
-        // Body content changes based on current page index
+
+        appBar: const AppBarWidget(),
+
         body: <Widget>[
           const HomePage(),
           SearchPage(
-              searchController: _searchController,
-              filteredButterflyList: _filteredButterflyList),
+            searchController: _searchController,
+            filteredButterflyList: _filteredButterflyList,
+          ),
           const ImagePage(),
           const DataPage(),
           const MenuPage(),
