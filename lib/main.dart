@@ -2,37 +2,40 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:tagfalter_monitoring/firebase_options.dart';
+import 'package:tagfalter_monitoring/pages/home/home_page.dart';
+import 'package:tagfalter_monitoring/pages/image/image_page.dart';
+import 'package:tagfalter_monitoring/pages/search/search_page.dart';
 
-import 'menupage.dart';
-import 'datapage.dart';
+import 'pages/menu/menu_page.dart';
+import 'pages/data/data_page.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  runApp(const NavigationBarApp());
+  runApp(const ButterflyApp());
 }
 
-class NavigationBarApp extends StatelessWidget {
-  const NavigationBarApp({super.key});
+class ButterflyApp extends StatelessWidget {
+  const ButterflyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: "Butterfly Demo",
       theme: ThemeData(useMaterial3: true),
-      home: const NavigationExample(),
+      home: const MainWidget(),
     );
   }
 }
 
-class NavigationExample extends StatefulWidget {
-  const NavigationExample({super.key});
+class MainWidget extends StatefulWidget {
+  const MainWidget({super.key});
 
   @override
-  State<NavigationExample> createState() => _NavigationExampleState();
+  State<MainWidget> createState() => MainWidgetState();
 }
 
-class _NavigationExampleState extends State<NavigationExample> {
+class MainWidgetState extends State<MainWidget> {
   int currentPageIndex = 0;
   final TextEditingController _searchController = TextEditingController();
   String _searchText = "";
@@ -164,115 +167,10 @@ class _NavigationExampleState extends State<NavigationExample> {
       ),
       // Body content changes based on current page index
       body: <Widget>[
-        // Home page
-        Scrollbar(
-          thumbVisibility: true,
-          child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Willkommen zum Tagfalter Monitoring',
-                    style: theme.textTheme.headlineSmall
-                        ?.copyWith(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    'TMD zur neuen ONLINE-DATENEINGABE (ab 2024)',
-                    style: theme.textTheme.titleMedium,
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    'Im Frühjahr 2005 startete das Tagfalter-Monitoring in Deutschland. '
-                        'Jahr für Jahr erfassen Freiwillige bei wöchentlichen Begehungen entlang '
-                        'festgelegter Strecken alle tagaktiven Schmetterlinge. Die gesammelten Daten '
-                        'dokumentieren die Entwicklung der Schmetterlingsbestände auf lokaler, '
-                        'regionaler und nationaler Ebene und können mit denen anderer europäischer Länder '
-                        'verglichen werden, in denen diese Beobachtungen schon seit Jahrzehnten durchgeführt werden.',
-                    style: theme.textTheme.bodyLarge,
-                    textAlign: TextAlign.justify,
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    'Das Projekt wird von zahlreichen Organisationen unterstützt, darunter NABU, BUND, '
-                        'das Bundesamt für Naturschutz (BfN), entomologische Verbände, die Gesellschaft für '
-                        'Schmetterlingsschutz sowie die europäische Stiftung Butterfly Conservation Europe.',
-                    style: theme.textTheme.bodyLarge,
-                    textAlign: TextAlign.justify,
-                  ),
-                  const SizedBox(height: 8), // Reduced space between text and image
-                  Center(
-                    child: Image.asset(
-                      'assets/images/UFZ_Logo.png',
-                      height: 150,
-                    ),
-                  ),
-                  const SizedBox(height: 30), // Added space after the logo
-                ],
-              ),
-            ),
-          ),
-        ),
-        // Search page with search bar and list of butterflies
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              // Search bar
-              TextField(
-                controller: _searchController,
-                decoration: InputDecoration(
-                  labelText: 'Suchen schmetterling...',
-                  prefixIcon: const Icon(Icons.search),
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8.0),
-                    borderSide: BorderSide(
-                      color: const Color.fromARGB(255, 119, 171, 105),
-                      width: 2.0,
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 20),
-              // Display filtered list of butterflies from Firebase
-              Expanded(
-                child: _filteredButterflyList.isEmpty
-                    ? Center(
-                  child: Text(
-                    'Schmetterling nicht gefunden',
-                    style: theme.textTheme.bodyLarge,
-                  ),
-                )
-                    : ListView.builder(
-                  itemCount: _filteredButterflyList.length,
-                  itemBuilder: (context, index) {
-                    return ListTile(
-                      title: Text(_filteredButterflyList[index]),
-                      onTap: () {
-                        // Add functionality to navigate to a detailed page or action if needed
-                      },
-                    );
-                  },
-                ),
-              ),
-            ],
-          ),
-        ),
-        // Add Image page
-        Center(
-          child: Text(
-            'Bild hinzufügen',
-            style: theme.textTheme.titleLarge,
-          ),
-        ),
-        // Data page
+        const HomePage(),
+        SearchPage(searchController:  _searchController, filteredButterflyList: _filteredButterflyList),
+        const ImagePage(),
         const DataPage(),
-        // Menu page
         const MenuPage(),
       ][currentPageIndex],
     );

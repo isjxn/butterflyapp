@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'detail_page.dart';
+import '../detail/detail_page.dart';
 
 class DataPage extends StatelessWidget {
   const DataPage({Key? key}) : super(key: key);
