@@ -12,6 +12,7 @@ class SearchPage extends StatefulWidget {
 class SearchPageState extends State<SearchPage> {
   final TextEditingController _searchController = TextEditingController();
   String _searchText = "";
+  final Set<String> _selectedButterflies = {}; // Para almacenar los IDs de las tarjetas seleccionadas
 
   @override
   void initState() {
@@ -22,6 +23,16 @@ class SearchPageState extends State<SearchPage> {
   void _onSearchChanged() {
     setState(() {
       _searchText = _searchController.text.toLowerCase();
+    });
+  }
+
+  void _toggleSelection(String id) {
+    setState(() {
+      if (_selectedButterflies.contains(id)) {
+        _selectedButterflies.remove(id);
+      } else {
+        _selectedButterflies.add(id);
+      }
     });
   }
 
@@ -83,6 +94,18 @@ class SearchPageState extends State<SearchPage> {
                     return species.contains(_searchText);
                   }).toList();
 
+                  // Ordenar los datos para que los seleccionados estén en la parte superior
+                  filteredData.sort((a, b) {
+                    final aId = a.id;
+                    final bId = b.id;
+                    final aSelected = _selectedButterflies.contains(aId);
+                    final bSelected = _selectedButterflies.contains(bId);
+
+                    if (aSelected && !bSelected) return -1;
+                    if (!aSelected && bSelected) return 1;
+                    return 0;
+                  });
+
                   return filteredData.isEmpty
                       ? Center(
                     child: Text(
@@ -100,6 +123,9 @@ class SearchPageState extends State<SearchPage> {
                       final species = butterflyData['species'] ?? 'Unknown Species';
                       final scientificName = butterflyData['scientific_name'] ?? 'Unknown Scientific Name';
                       final image = butterflyData['image'];
+                      final id = doc.id;
+
+                      final isSelected = _selectedButterflies.contains(id);
 
                       return Card(
                         margin: const EdgeInsets.all(8.0),
@@ -116,7 +142,25 @@ class SearchPageState extends State<SearchPage> {
                             fallbackHeight: 100,
                             fallbackWidth: 100,
                           ),
-                          title: Text(species),
+                          title: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  species,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                              GestureDetector(
+                                onTap: () => _toggleSelection(id),
+                                child: Icon(
+                                  isSelected ? Icons.star : Icons.star_border,
+                                  color: isSelected ? Colors.amber : Colors.grey,
+                                  size: 20, // Tamaño más pequeño
+                                ),
+                              ),
+                            ],
+                          ),
                           subtitle: Text(scientificName),
                           onTap: () {
                             Navigator.push(
