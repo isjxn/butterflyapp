@@ -12,7 +12,7 @@ class SearchPage extends StatefulWidget {
 class SearchPageState extends State<SearchPage> {
   final TextEditingController _searchController = TextEditingController();
   String _searchText = "";
-  final Set<String> _selectedButterflies = {}; // Para almacenar los IDs de las tarjetas seleccionadas
+  final Set<String> _selectedButterflies = {}; // To store the IDs of selected cards
 
   @override
   void initState() {
@@ -94,7 +94,7 @@ class SearchPageState extends State<SearchPage> {
                     return species.contains(_searchText);
                   }).toList();
 
-                  // Ordenar los datos para que los seleccionados estén en la parte superior
+                  // Sort the data so that selected items appear at the top
                   filteredData.sort((a, b) {
                     final aId = a.id;
                     final bId = b.id;
@@ -156,7 +156,7 @@ class SearchPageState extends State<SearchPage> {
                                 child: Icon(
                                   isSelected ? Icons.star : Icons.star_border,
                                   color: isSelected ? Colors.amber : Colors.grey,
-                                  size: 20, // Tamaño más pequeño
+                                  size: 20, // Smaller size
                                 ),
                               ),
                             ],
