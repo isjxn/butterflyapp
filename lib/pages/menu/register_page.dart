@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';  // Importa Firestore
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({Key? key}) : super(key: key);
@@ -10,20 +11,51 @@ class RegisterPage extends StatefulWidget {
 
 class _RegisterPageState extends State<RegisterPage> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;  // Instancia de Firestore
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   String? _errorMessage;
 
   Future<void> _register() async {
     try {
-      await _auth.createUserWithEmailAndPassword(
+      // Crear usuario en Firebase Authentication
+      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
-      Navigator.pop(context); // Return to MenuPage after registration
+
+      // Obtener el usuario registrado
+      User? user = userCredential.user;
+
+      // Guardar datos adicionales en Firestore
+      if (user != null) {
+        await _firestore.collection('users').doc(user.uid).set({
+          'email': user.email,
+          'createdAt': Timestamp.now(),
+        });
+      }
+
+      Navigator.pop(context); // Regresar a la pantalla anterior
     } on FirebaseAuthException catch (e) {
       setState(() {
-        _errorMessage = e.message;
+        switch (e.code) {
+          case 'email-already-in-use':
+            _errorMessage = 'The email address is already in use by another account.';
+            break;
+          case 'invalid-email':
+            _errorMessage = 'The email address is not valid.';
+            break;
+          case 'weak-password':
+            _errorMessage = 'The password is too weak.';
+            break;
+          default:
+            _errorMessage = 'An unknown error occurred. Please try again.';
+            break;
+        }
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'An error occurred: $e';
       });
     }
   }
@@ -42,6 +74,7 @@ class _RegisterPageState extends State<RegisterPage> {
             TextField(
               controller: _emailController,
               decoration: const InputDecoration(labelText: 'Email'),
+              keyboardType: TextInputType.emailAddress,  // Opcional: Mejora la experiencia del usuario
             ),
             TextField(
               controller: _passwordController,

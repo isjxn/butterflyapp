@@ -20,10 +20,30 @@ class _LoginPageState extends State<LoginPage> {
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
-      Navigator.pop(context); // Return to MenuPage after login
+      Navigator.pop(context); // Regresar a la pantalla anterior después del inicio de sesión
     } on FirebaseAuthException catch (e) {
       setState(() {
-        _errorMessage = e.message;
+        switch (e.code) {
+          case 'user-not-found':
+            _errorMessage = 'No user found for that email.';
+            break;
+          case 'wrong-password':
+            _errorMessage = 'Wrong password provided for that user.';
+            break;
+          case 'invalid-email':
+            _errorMessage = 'The email address is not valid.';
+            break;
+          case 'network-request-failed':
+            _errorMessage = 'Network request failed. Please check your internet connection.';
+            break;
+          default:
+            _errorMessage = 'An unknown error occurred: ${e.code}';
+            break;
+        }
+      });
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'An unexpected error occurred: $e';
       });
     }
   }
@@ -42,6 +62,7 @@ class _LoginPageState extends State<LoginPage> {
             TextField(
               controller: _emailController,
               decoration: const InputDecoration(labelText: 'Email'),
+              keyboardType: TextInputType.emailAddress,  // Opcional: Mejora la experiencia del usuario
             ),
             TextField(
               controller: _passwordController,
