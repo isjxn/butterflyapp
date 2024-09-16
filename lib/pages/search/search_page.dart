@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import '../detail/detail_page.dart';
 
@@ -12,7 +13,7 @@ class SearchPage extends StatefulWidget {
 class SearchPageState extends State<SearchPage> {
   final TextEditingController _searchController = TextEditingController();
   String _searchText = "";
-  final Set<String> _selectedButterflies = {}; // To store the IDs of selected cards
+  final Set<String> _selectedButterflies = {}; // To store the names of selected butterflies
 
   @override
   void initState() {
@@ -26,14 +27,42 @@ class SearchPageState extends State<SearchPage> {
     });
   }
 
-  void _toggleSelection(String id) {
-    setState(() {
-      if (_selectedButterflies.contains(id)) {
-        _selectedButterflies.remove(id);
+  Future<void> _toggleSelection(String id, String species, bool isSelected) async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      // Handle the case where the user is not authenticated
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('User is not authenticated')),
+      );
+      return;
+    }
+
+    try {
+      final userFavoritesRef = FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .collection('favorites');
+
+      if (isSelected) {
+        // Add the selected butterfly to the user's favorites with its species name
+        await userFavoritesRef.doc(id).set({
+          'species': species,
+        });
+        _selectedButterflies.add(id); // Use ID for tracking selection state
       } else {
-        _selectedButterflies.add(id);
+        // Remove the selected butterfly from the user's favorites
+        await userFavoritesRef.doc(id).delete();
+        _selectedButterflies.remove(id); // Use ID for tracking selection state
       }
-    });
+
+      setState(() {}); // Update the state after making changes
+    } catch (e) {
+      // Handle errors here (e.g., show a snackbar or dialog)
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to update favorite status: $e')),
+      );
+    }
   }
 
   @override
@@ -152,7 +181,11 @@ class SearchPageState extends State<SearchPage> {
                                 ),
                               ),
                               GestureDetector(
-                                onTap: () => _toggleSelection(id),
+                                onTap: () => _toggleSelection(
+                                  id,
+                                  species, // Pass species name
+                                  !isSelected,
+                                ),
                                 child: Icon(
                                   isSelected ? Icons.star : Icons.star_border,
                                   color: isSelected ? Colors.amber : Colors.grey,
