@@ -20,7 +20,7 @@ class _LoginPageState extends State<LoginPage> {
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
-      Navigator.pop(context); // Regresar a la pantalla anterior después del inicio de sesión
+      Navigator.pop(context);
     } on FirebaseAuthException catch (e) {
       setState(() {
         switch (e.code) {
@@ -62,7 +62,7 @@ class _LoginPageState extends State<LoginPage> {
             TextField(
               controller: _emailController,
               decoration: const InputDecoration(labelText: 'Email'),
-              keyboardType: TextInputType.emailAddress,  // Opcional: Mejora la experiencia del usuario
+              keyboardType: TextInputType.emailAddress,
             ),
             TextField(
               controller: _passwordController,

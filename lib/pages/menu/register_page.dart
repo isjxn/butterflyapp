@@ -18,16 +18,13 @@ class _RegisterPageState extends State<RegisterPage> {
 
   Future<void> _register() async {
     try {
-      // Crear usuario en Firebase Authentication
       UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
 
-      // Obtener el usuario registrado
       User? user = userCredential.user;
 
-      // Guardar datos adicionales en Firestore
       if (user != null) {
         await _firestore.collection('users').doc(user.uid).set({
           'email': user.email,
@@ -74,7 +71,7 @@ class _RegisterPageState extends State<RegisterPage> {
             TextField(
               controller: _emailController,
               decoration: const InputDecoration(labelText: 'Email'),
-              keyboardType: TextInputType.emailAddress,  // Opcional: Mejora la experiencia del usuario
+              keyboardType: TextInputType.emailAddress,
             ),
             TextField(
               controller: _passwordController,
