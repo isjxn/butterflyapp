@@ -34,8 +34,9 @@ class BottomNavigationBarWidget extends StatelessWidget {
             },
           ),
           IconButton(
-            icon: Icon(
-              Icons.search,
+            icon: ImageIcon(
+              const AssetImage('assets/images/schmetterling.png'),
+              size: 24.0,
               color: currentPageIndex == 1 ? Colors.white : Colors.black,
             ),
             onPressed: () {
@@ -43,9 +44,8 @@ class BottomNavigationBarWidget extends StatelessWidget {
             },
           ),
           IconButton(
-            icon: ImageIcon(
-              const AssetImage('assets/images/schmetterling.png'),
-              size: 24.0,
+            icon: Icon(
+              Icons.image,
               color: currentPageIndex == 2 ? Colors.white : Colors.black,
             ),
             onPressed: () {
