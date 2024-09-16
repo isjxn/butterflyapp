@@ -5,12 +5,11 @@ import 'package:tagfalter_monitoring/firebase_options.dart';
 import 'package:tagfalter_monitoring/pages/camera/camera_page.dart';
 import 'package:tagfalter_monitoring/pages/home/home_page.dart';
 import 'package:tagfalter_monitoring/pages/image/image_page.dart';
-import 'package:tagfalter_monitoring/pages/search/search_page.dart';
+import 'package:tagfalter_monitoring/pages/search/search_page.dart'; // SearchPage will now include DataPage content
 import 'package:tagfalter_monitoring/widgets/bottom_navigation_bar_widget.dart';
 import 'package:tagfalter_monitoring/widgets/app_bar_widget.dart'; // Import the new AppBar widget
 
 import 'pages/menu/menu_page.dart';
-import 'pages/data/data_page.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -72,9 +71,8 @@ class ButterflyAppState extends State<ButterflyApp> {
 
         body: <Widget>[
           const HomePage(),
-          const SearchPage(), // Updated to remove dependencies
+          const SearchPage(), // SearchPage now contains DataPage content
           const ImagePage(),
-          const DataPage(),
           const MenuPage(),
           CameraPage(camera: widget.camera)
         ][currentPageIndex],
