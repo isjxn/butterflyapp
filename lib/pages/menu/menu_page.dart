@@ -14,6 +14,7 @@ class MenuPage extends StatelessWidget {
       builder: (context, snapshot) {
         final User? user = snapshot.data;
 
+
         // check if user is logged in and retrieve and display user/ email
         String username = user?.displayName ?? user?.email ?? 'Anonymous';
 
@@ -145,8 +146,8 @@ class MenuPage extends StatelessWidget {
             },
             trailing: const Icon(Icons.chevron_right),
           ),
-        ],
-      ),
+        );
+      },
     );
   });
 }}
