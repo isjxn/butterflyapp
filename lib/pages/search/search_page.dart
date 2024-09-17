@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:tagfalter_monitoring/pages/identifyButterflies/identifier_page.dart';
 import '../detail/detail_page.dart';
 
 class SearchPage extends StatefulWidget {
@@ -133,6 +134,22 @@ class SearchPageState extends State<SearchPage> {
                   ),
                 ),
               ),
+            ),
+            // Button to navigate to the butterfly Identifier
+            ElevatedButton(
+              onPressed: () {
+                // Navigate to the new page
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const ButterflySwipeGame(), // Replace with your new page
+                  ),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color.fromARGB(255, 119, 171, 105),
+              ),
+              child: const Text('BUTTERFLY IDENTIFIER'),
             ),
             const SizedBox(height: 20),
             // Display filtered list of butterflies from Firebase
