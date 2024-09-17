@@ -142,7 +142,7 @@ class SearchPageState extends State<SearchPage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => const IdentifierPage(), // Replace with your new page
+                    builder: (context) => const ButterflySwipeGame(), // Replace with your new page
                   ),
                 );
               },

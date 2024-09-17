@@ -1,61 +1,142 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:swipe_cards/swipe_cards.dart';
 
-class IdentifierPage extends StatefulWidget {
-  const IdentifierPage({super.key});
+class ButterflySwipeGame extends StatefulWidget {
+  const ButterflySwipeGame({Key? key}) : super(key: key);
 
   @override
-  IdentifierPageState createState() => IdentifierPageState();
+  _ButterflySwipeGameState createState() => _ButterflySwipeGameState();
 }
 
-class IdentifierPageState extends State<IdentifierPage> {
-  List<SwipeItem> _swipeItems = [];
-  List<String> _butterflyNames = [
-    "Butterfly 1",
-    "Butterfly 2",
-    "Butterfly 3",
-    "Butterfly 4",
-    "Butterfly 5"
-  ];
+class _ButterflySwipeGameState extends State<ButterflySwipeGame> {
+  List<DocumentSnapshot> butterflyList = [];
   late MatchEngine _matchEngine;
+  List<SwipeItem> _swipeItems = [];
+  final List<String> _characteristicsKeys = [
+    'color_black',
+    'color_yellow',
+    'has_spots',
+    'has_pickles',
+    'wing_shape_pointy',
+  ];
+
+  int currentQuestionIndex = 0;
 
   @override
   void initState() {
     super.initState();
+    _loadButterfliesFromFirebase();
+  }
 
-    // Initialize swipe items with butterfly names
-    for (var name in _butterflyNames) {
-      _swipeItems.add(
-        SwipeItem(
-          content: name,
-          likeAction: () {
-            // Handle the swipe right action
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('You liked $name')),
-            );
-          },
-          nopeAction: () {
-            // Handle the swipe left action
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('You disliked $name')),
-            );
-          },
-        ),
+  // Load butterfly data from Firestore
+  Future<void> _loadButterfliesFromFirebase() async {
+    try {
+      final QuerySnapshot snapshot = await FirebaseFirestore.instance
+          .collection('butterflies')
+          .get();
+
+      setState(() {
+        butterflyList = snapshot.docs;
+        _initializeSwipeItems(); // Initialize swipe items with all questions
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to load butterflies: $e')),
       );
     }
+  }
 
-    // Initialize match engine with the swipe items
+  // Initialize swipe items for SwipeCards
+  void _initializeSwipeItems() {
+    _swipeItems = _characteristicsKeys.map((questionKey) {
+      return SwipeItem(
+        content: _formatQuestion(questionKey),
+        likeAction: () {
+          _onSwipeYes(questionKey);
+        },
+        nopeAction: () {
+          _onSwipeNo(questionKey);
+        },
+      );
+    }).toList();
+
     _matchEngine = MatchEngine(swipeItems: _swipeItems);
+    setState(() {}); // Trigger UI update
+  }
+
+  // Swipe right (Yes) to filter butterflies based on the current question
+  void _onSwipeYes(String questionKey) {
+    setState(() {
+      butterflyList = butterflyList.where((doc) {
+        final characteristics = doc['questionnaire_charachteristics'] ?? {};
+        return characteristics[questionKey] == true;
+      }).toList();
+
+      _tryIdentifyButterfly(); // Check if we can identify the butterfly
+    });
+  }
+
+  // Swipe left (No) to filter butterflies based on the current question
+  void _onSwipeNo(String questionKey) {
+    setState(() {
+      butterflyList = butterflyList.where((doc) {
+        final characteristics = doc['questionnaire_charachteristics'] ?? {};
+        return characteristics[questionKey] == false;
+      }).toList();
+
+      _tryIdentifyButterfly(); // Check if we can identify the butterfly
+    });
+  }
+
+  // Try to identify the butterfly after all the questions
+  void _tryIdentifyButterfly() {
+    if (butterflyList.length == 1) {
+      _endGameSuccess(butterflyList.first);
+    } else if (butterflyList.isEmpty) {
+      _endGameNoMatch();
+    } else {
+      _endGameMultipleMatches();
+    }
+  }
+
+  // End the game when only one butterfly is identified
+  void _endGameSuccess(DocumentSnapshot butterfly) {
+    final species = butterfly['species'] ?? 'Unknown species';
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('The butterfly is: $species')),
+    );
+  }
+
+  // End the game when no butterflies match
+  void _endGameNoMatch() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('No butterfly matches your description.')),
+    );
+  }
+
+  // End the game when multiple butterflies still match after all questions
+  void _endGameMultipleMatches() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          'Could not identify the butterfly with certainty.',
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Swipe to Identify Butterflies'),
+        title: const Text('Butterfly Identifier'),
         backgroundColor: const Color.fromARGB(255, 119, 171, 105),
       ),
-      body: Column(
+      body: _swipeItems.isEmpty
+          ? const Center(child: CircularProgressIndicator())
+          : Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Expanded(
@@ -63,52 +144,41 @@ class IdentifierPageState extends State<IdentifierPage> {
               matchEngine: _matchEngine,
               itemBuilder: (BuildContext context, int index) {
                 return Card(
-                  margin: const EdgeInsets.all(16.0),
+                  margin: const EdgeInsets.all(20),
                   child: Center(
                     child: Text(
-                      _swipeItems[index].content as String,
-                      style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                      _swipeItems[index].content,
+                      style: const TextStyle(fontSize: 24),
+                      textAlign: TextAlign.center,
                     ),
                   ),
                 );
               },
-              onStackFinished: () {
-                // Handle when the card stack is finished
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('No more butterflies to show')),
-                );
-              },
-              upSwipeAllowed: false,
-              fillSpace: true,
+              onStackFinished: _tryIdentifyButterfly, // Try to identify after all cards
             ),
           ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              // Dislike button (Swipe Left)
-              ElevatedButton(
-                onPressed: () {
-                  _matchEngine.currentItem?.nope();
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red, // Red for dislike
-                ),
-                child: const Icon(Icons.close),
-              ),
-              // Like button (Swipe Right)
-              ElevatedButton(
-                onPressed: () {
-                  _matchEngine.currentItem?.like();
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green, // Green for like
-                ),
-                child: const Icon(Icons.favorite),
-              ),
-            ],
+          const SizedBox(height: 20),
+          const Text(
+            "Swipe right for YES, left for NO",
+            style: TextStyle(fontSize: 18),
           ),
+          const SizedBox(height: 20),
         ],
       ),
     );
+  }
+
+  // Helper method to format the question string
+  String _formatQuestion(String key) {
+    if (key.startsWith('color_')) {
+      return "Is it ${key.replaceFirst('color_', '')}?";
+    } else if (key == 'has_spots') {
+      return "Does it have spots?";
+    } else if (key == 'has_pickles') {
+      return "Does it have pickles?";
+    } else if (key == 'wing_shape_pointy') {
+      return "Are the wings pointy?";
+    }
+    return key;
   }
 }
