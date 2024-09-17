@@ -19,6 +19,40 @@ class SearchPageState extends State<SearchPage> {
   void initState() {
     super.initState();
     _searchController.addListener(_onSearchChanged);
+    _loadUserFavorites(); // Load favorites on init
+  }
+
+  // Load the user's favorites from Firebase
+  Future<void> _loadUserFavorites() async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      // Handle the case where the user is not authenticated
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('User is not authenticated')),
+      );
+      return;
+    }
+
+    try {
+      final userFavoritesRef = FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .collection('favorites');
+
+      final favoritesSnapshot = await userFavoritesRef.get();
+
+      setState(() {
+        _selectedButterflies.clear();
+        for (var doc in favoritesSnapshot.docs) {
+          _selectedButterflies.add(doc.id); // Add the butterfly ID to the selected set
+        }
+      });
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to load favorites: $e')),
+      );
+    }
   }
 
   void _onSearchChanged() {
@@ -31,9 +65,8 @@ class SearchPageState extends State<SearchPage> {
     final user = FirebaseAuth.instance.currentUser;
 
     if (user == null) {
-      // Handle the case where the user is not authenticated
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('User is not authenticated')),
+        const SnackBar(content: Text('User is not authenticated')),
       );
       return;
     }
@@ -49,16 +82,15 @@ class SearchPageState extends State<SearchPage> {
         await userFavoritesRef.doc(id).set({
           'species': species,
         });
-        _selectedButterflies.add(id); // Use ID for tracking selection state
+        _selectedButterflies.add(id);
       } else {
         // Remove the selected butterfly from the user's favorites
         await userFavoritesRef.doc(id).delete();
-        _selectedButterflies.remove(id); // Use ID for tracking selection state
+        _selectedButterflies.remove(id);
       }
 
-      setState(() {}); // Update the state after making changes
+      setState(() {});
     } catch (e) {
-      // Handle errors here (e.g., show a snackbar or dialog)
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to update favorite status: $e')),
       );
@@ -189,7 +221,7 @@ class SearchPageState extends State<SearchPage> {
                                 child: Icon(
                                   isSelected ? Icons.star : Icons.star_border,
                                   color: isSelected ? Colors.amber : Colors.grey,
-                                  size: 20, // Smaller size
+                                  size: 20,
                                 ),
                               ),
                             ],

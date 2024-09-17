@@ -13,14 +13,24 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   String? _errorMessage;
+  User? _user; // To store the logged-in user
+
+  @override
+  void initState() {
+    super.initState();
+    _user = _auth.currentUser; // Check if already logged in
+  }
 
   Future<void> _login() async {
     try {
-      await _auth.signInWithEmailAndPassword(
+      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
       );
-      Navigator.pop(context);
+      setState(() {
+        _user = userCredential.user; // Save the logged-in user
+        _errorMessage = null;
+      });
     } on FirebaseAuthException catch (e) {
       setState(() {
         switch (e.code) {
@@ -48,15 +58,23 @@ class _LoginPageState extends State<LoginPage> {
     }
   }
 
+  Future<void> _logout() async {
+    await _auth.signOut();
+    setState(() {
+      _user = null; // Clear the user when logging out
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Login'),
+        title: const Text('Login/Logout'),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
+        child: _user == null
+            ? Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             TextField(
@@ -82,6 +100,20 @@ class _LoginPageState extends State<LoginPage> {
                   style: const TextStyle(color: Colors.red),
                 ),
               ),
+          ],
+        )
+            : Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Text(
+              'You are already logged in!',
+              style: TextStyle(fontSize: 24),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: _logout,
+              child: const Text('Logout'),
+            ),
           ],
         ),
       ),
