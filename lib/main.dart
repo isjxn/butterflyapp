@@ -32,6 +32,7 @@ class ButterflyApp extends StatefulWidget {
 
 class ButterflyAppState extends State<ButterflyApp> {
   int currentPageIndex = 0;
+  String? capturedImagePath; // Variable to hold the captured image path
 
   @override
   Widget build(BuildContext context) {
@@ -41,14 +42,23 @@ class ButterflyAppState extends State<ButterflyApp> {
       home: Scaffold(
         extendBody: true,
         floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            if (currentPageIndex == 5) {
-              setState(() {
-                currentPageIndex = 2;
-              });
+          onPressed: () async {
+            if (currentPageIndex == 4) {
+              // If on the camera page, take the picture
+              try {
+                final image = await takePicture(); // Capture the image
+                setState(() {
+                  capturedImagePath = image.path; // Store the captured image path
+                  currentPageIndex = 2; // Navigate to ImagePage
+                });
+              } catch (e) {
+                // Handle the error (e.g., no camera permission or camera not ready)
+                print(e);
+              }
             } else {
+              // Otherwise, navigate to the camera page
               setState(() {
-                currentPageIndex = 5;
+                currentPageIndex = 4;
               });
             }
           },
@@ -72,12 +82,26 @@ class ButterflyAppState extends State<ButterflyApp> {
 
         body: <Widget>[
           const HomePage(),
-          const SearchPage(), // SearchPage now contains DataPage content
-          const ImagePage(),
+          const SearchPage(),
+          ImagePage(imagePath: capturedImagePath), // Pass image path to ImagePage
           const MenuPage(),
-          CameraPage(camera: widget.camera)
+          CameraPage(camera: widget.camera, onPictureTaken: takePicture),
         ][currentPageIndex],
       ),
     );
   }
+
+  Future<XFile> takePicture() async {
+    // Ensure the camera controller is initialized
+    if (mounted) {
+      final cameraController = CameraPageState.cameraController;
+      if (cameraController != null && cameraController.value.isInitialized) {
+        return await cameraController.takePicture();
+      } else {
+        throw Exception('Camera is not initialized');
+      }
+    }
+    throw Exception('Widget is not mounted');
+  }
 }
+
