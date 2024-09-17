@@ -70,6 +70,7 @@ class _LoginPageState extends State<LoginPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Login/Logout'),
+        backgroundColor: const Color.fromARGB(255, 119, 171, 105),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -79,12 +80,13 @@ class _LoginPageState extends State<LoginPage> {
           children: [
             TextField(
               controller: _emailController,
-              decoration: const InputDecoration(labelText: 'Email'),
+              decoration: const InputDecoration(labelText: 'Email', border: OutlineInputBorder()),
               keyboardType: TextInputType.emailAddress,
             ),
+            const SizedBox(height: 16.0), 
             TextField(
               controller: _passwordController,
-              decoration: const InputDecoration(labelText: 'Password'),
+              decoration: const InputDecoration(labelText: 'Password', border: OutlineInputBorder()),
               obscureText: true,
             ),
             const SizedBox(height: 20),
