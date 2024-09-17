@@ -1,85 +1,148 @@
 import 'package:flutter/material.dart';
-
+import 'package:firebase_auth/firebase_auth.dart';
 import 'login_page.dart';
 import 'register_page.dart';
 
 class MenuPage extends StatelessWidget {
-  const MenuPage({Key? key}) : super(key: key);
+  const MenuPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Use StreamBuilder to listen to authentication state changes
+    return StreamBuilder<User?>(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        final User? user = snapshot.data;
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Menu'),
+        // title: const Text('Menu'),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16.0),
         children: [
+          // Account Section
+          Padding(
+            padding: const EdgeInsets.only(left: 16.0, top: 8.0),
+            child: Text(
+              'Account',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey[700],
+              ),
+            ),
+          ),
           ListTile(
             leading: const Icon(Icons.person),
-            title: const Text('Login'),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const LoginPage()),
-              );
-            },
+            title: Text(user == null ? 'Login' : 'Logout'), // Show "Login" or "Logout" based on user status
+                onTap: () {
+                  if (user == null) {
+                    // If the user is not logged in, navigate to the LoginPage
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const LoginPage()),
+                    );
+                  } else {
+                    // If the user is logged in, just navigate to LoginPage
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const LoginPage()),
+                    );
+                  }
+                },
+            trailing: const Icon(Icons.chevron_right),
           ),
+           if (user == null) // Only show the "Register" option if not logged in
           ListTile(
-            leading: const Icon(Icons.app_registration),
+            leading: const Icon(Icons.person_add),
             title: const Text('Register'),
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const RegisterPage()),
-              );
+               Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => const RegisterPage()),
+                    );
             },
+            trailing: const Icon(Icons.chevron_right),
           ),
-          const Divider(),
+          const Divider(), // Separator for sections
+
+          // Settings Section
+          Padding(
+            padding: const EdgeInsets.only(left: 16.0, top: 8.0),
+            child: Text(
+              'TODO: Settings',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey[700],
+              ),
+            ),
+          ),
           ListTile(
             leading: const Icon(Icons.settings),
-            title: const Text('TODO: Settings'),
+            title: const Text('App'),
             onTap: () {
-              // Add settings navigation functionality
+              // Navigate to App Settings
             },
+            trailing: const Icon(Icons.chevron_right),
           ),
           const Divider(),
-          ExpansionTile(
-            leading: const Icon(Icons.info_outline),
-            title: const Text('TODO: Info'),
-            children: [
-              ListTile(
-                leading: const Icon(Icons.book),
-                title: const Text('Anleitung (Guide)'),
-                onTap: () {
-                  // Navigate to Guide page
-                },
+
+          // Info Section
+          Padding(
+            padding: const EdgeInsets.only(left: 16.0, top: 8.0),
+            child: Text(
+              'TODO: Info',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey[700],
               ),
-              ListTile(
-                leading: const Icon(Icons.help_outline),
-                title: const Text('Hilfe (Help)'),
-                onTap: () {
-                  // Navigate to Help page
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.business),
-                title: const Text('Über Impressum (Imprint)'),
-                onTap: () {
-                  // Navigate to Imprint page
-                },
-              ),
-              ListTile(
-                leading: const Icon(Icons.privacy_tip),
-                title: const Text('Datenschutz (Privacy Policy)'),
-                onTap: () {
-                  // Navigate to Privacy Policy page
-                },
-              ),
-            ],
+            ),
+          ),
+          ListTile(
+            leading: const Icon(Icons.menu_book),
+            title: const Text('How to use'),
+            onTap: () {
+              // Navigate to Help
+            },
+            trailing: const Icon(Icons.chevron_right),
+          ),
+          ListTile(
+            leading: const Icon(Icons.help),
+            title: const Text('Help'),
+            onTap: () {
+              // Navigate to Help
+            },
+            trailing: const Icon(Icons.chevron_right),
+          ),
+          ListTile(
+            leading: const Icon(Icons.info),
+            title: const Text('About'),
+            onTap: () {
+              // Navigate to Help
+            },
+            trailing: const Icon(Icons.chevron_right),
+          ),
+          ListTile(
+            leading: const Icon(Icons.favorite),
+            title: const Text('Imprint'),
+            onTap: () {
+              // Navigate to Credits
+            },
+            trailing: const Icon(Icons.chevron_right),
+          ),
+          ListTile(
+            leading: const Icon(Icons.lock),
+            title: const Text('Privacy Policy'),
+            onTap: () {
+              // Navigate to Privacy Policy
+            },
+            trailing: const Icon(Icons.chevron_right),
           ),
         ],
       ),
     );
-  }
-}
+  });
+}}
