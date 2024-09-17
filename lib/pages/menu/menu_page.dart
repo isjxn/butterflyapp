@@ -14,6 +14,9 @@ class MenuPage extends StatelessWidget {
       builder: (context, snapshot) {
         final User? user = snapshot.data;
 
+        // check if user is logged in and retrieve and display user/ email
+        String username = user?.displayName ?? user?.email ?? 'Anonymous';
+
     return Scaffold(
       appBar: AppBar(
         // title: const Text('Menu'),
@@ -36,6 +39,7 @@ class MenuPage extends StatelessWidget {
           ListTile(
             leading: const Icon(Icons.person),
             title: Text(user == null ? 'Login' : 'Logout'), // Show "Login" or "Logout" based on user status
+            subtitle: user != null ? Text('Logged in as $username'): null,
                 onTap: () {
                   if (user == null) {
                     // If the user is not logged in, navigate to the LoginPage
