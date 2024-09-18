@@ -149,7 +149,8 @@ class SearchPageState extends State<SearchPage> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: const Color.fromARGB(255, 119, 171, 105),
               ),
-              child: const Text('BUTTERFLY IDENTIFIER'),
+              child: const Text('BUTTERFLY IDENTIFIER',
+              style: TextStyle(color: Colors.black) ),
             ),
             const SizedBox(height: 20),
             // Display filtered list of butterflies from Firebase
