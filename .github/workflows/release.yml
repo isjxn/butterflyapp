@@ -16,7 +16,7 @@ jobs:
           fetch-depth: 0  # Fetch all history for all branches and tags
 
       - name: Install Flutter SDK
-        uses: actions/flutter-action@v2
+        uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.24.2'  # Replace with your desired Flutter version
 
