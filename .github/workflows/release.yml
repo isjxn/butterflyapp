@@ -1,0 +1,67 @@
+name: Build and Release Flutter App
+
+on:
+  push:
+    tags:
+      - 'v*'  # Triggers when a tag starting with 'v' is pushed
+
+jobs:
+  build-and-release:
+    name: Build and Release
+    runs-on: macos-latest  # macOS is required for iOS builds
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0  # Fetch all history for all branches and tags
+
+      - name: Install Flutter SDK
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: 'latest'
+
+      - name: Cache Pub Packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.pub-cache
+          key: ${{ runner.os }}-pub-${{ hashFiles('pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pub-
+
+      - name: Get Flutter Dependencies
+        run: flutter pub get
+
+      - name: Build Android APK
+        run: flutter build apk --release
+
+      - name: Build iOS IPA
+        run: flutter build ipa --no-codesign
+
+      - name: Generate Changelog
+        id: changelog
+        shell: bash
+        run: |
+          echo "Generating changelog..."
+          CURRENT_TAG=${GITHUB_REF#refs/tags/}
+          echo "Current tag: $CURRENT_TAG"
+          PREVIOUS_TAG=$(git describe --tags --abbrev=0 ${{ github.sha }}^)
+          echo "Previous tag: $PREVIOUS_TAG"
+          CHANGELOG=$(git log $PREVIOUS_TAG..$CURRENT_TAG --pretty=format:"* %s (%h)")
+          echo "$CHANGELOG" > changelog.txt
+          echo "CHANGELOG<<EOF" >> $GITHUB_ENV
+          echo "$CHANGELOG" >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: Release ${{ github.ref_name }}
+          body: ${{ env.CHANGELOG }}
+          files: |
+            build/app/outputs/flutter-apk/app-release.apk
+            build/ios/ipa/*.ipa
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
