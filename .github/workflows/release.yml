@@ -8,21 +8,29 @@ on:
 jobs:
   build-and-release:
     name: Build and Release
-    runs-on: ubuntu-latest 
+    runs-on: ubuntu-latest  # Ubuntu is sufficient for Android builds
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
           tags: true  # Ensures all tags are fetched
-
+      
       - name: List Git Tags
         run: git tag --list
+
+      - name: Set up JDK 17
+        id: setup-java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'  # Options: 'temurin', 'zulu', 'adopt', etc.
+          java-version: '17'
+          cache: gradle
 
       - name: Install Flutter SDK
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.2'
+          flutter-version: '3.24.2'  # Replace with your desired Flutter version
 
       - name: Cache Pub Packages
         uses: actions/cache@v3
@@ -35,7 +43,13 @@ jobs:
       - name: Get Flutter Dependencies
         run: flutter pub get
 
+      - name: Check Java Version
+        run: java -version
+
       - name: Build Android APK
+        env:
+          JAVA_HOME: ${{ steps.setup-java.outputs.java-home }}
+          PATH: ${{ steps.setup-java.outputs.path }}
         run: flutter build apk --release
 
       - name: Generate Changelog
