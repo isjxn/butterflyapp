@@ -8,21 +8,21 @@ on:
 jobs:
   build-and-release:
     name: Build and Release
-    runs-on: macos-latest  # macOS is required for iOS builds
+    runs-on: ubuntu-latest 
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
           tags: true  # Ensures all tags are fetched
-      
+
       - name: List Git Tags
         run: git tag --list
 
       - name: Install Flutter SDK
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.2'  # Replace with your desired Flutter version
+          flutter-version: '3.24.2'
 
       - name: Cache Pub Packages
         uses: actions/cache@v3
@@ -37,9 +37,6 @@ jobs:
 
       - name: Build Android APK
         run: flutter build apk --release
-
-      #- name: Build iOS IPA
-      #  run: flutter build ipa --no-codesign
 
       - name: Generate Changelog
         id: changelog
@@ -74,6 +71,5 @@ jobs:
           body: ${{ env.CHANGELOG }}
           files: |
             build/app/outputs/flutter-apk/app-release.apk
-            build/ios/ipa/*.ipa
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
