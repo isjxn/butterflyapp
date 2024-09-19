@@ -5,6 +5,9 @@ on:
     tags:
       - 'v*'  # Triggers when a tag starting with 'v' is pushed
 
+permissions:
+  contents: write
+
 jobs:
   build-and-release:
     name: Build and Release
@@ -15,7 +18,7 @@ jobs:
         with:
           fetch-depth: 0
           tags: true  # Ensures all tags are fetched
-      
+
       - name: List Git Tags
         run: git tag --list
 
@@ -77,7 +80,7 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.ref_name }}
-          release_name: Release ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
           body: ${{ env.CHANGELOG }}
           files: |
             build/app/outputs/flutter-apk/app-release.apk
